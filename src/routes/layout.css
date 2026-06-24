@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+
+:root {
+  /* Default Theme: Dark Mode First */
+  --bg-body: #030712;
+  --bg-card: #0b0f19;
+  --bg-panel: #0f172a;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #1e293b;
+  --bg-input: #0f172a;
+  
+  /* Theme-aware variables from user request */
+  --bg-color: var(--bg-body);
+  --card-bg: var(--bg-card);
+  --text-primary: var(--text-main);
+  --text-secondary: var(--text-muted);
+  --border-color: var(--border);
+
+  /* Navbar specific variables (remains dark in both themes) */
+  --bg-nav: #0b0f19;
+  --text-nav: #f1f5f9;
+  --text-nav-muted: #94a3b8;
+  --border-nav: #1e293b;
+
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --accent: #fbbf24;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --success: #10b981;
+  --card-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(15, 23, 42, 0.4);
+
+  /* Hero / Banner specific variables (Dark Mode) */
+  --bg-hero: linear-gradient(135deg, #1e1b4b 0%, #030712 100%);
+  --border-hero: var(--border);
+  --text-hero-main: var(--text-main);
+  --text-hero-muted: var(--text-muted);
+}
+
+[data-theme="light"] {
+  /* Light Mode Overrides */
+  --bg-body: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-panel: #f1f5f9;
+  --text-main: #0f172a;       /* Dark slate/black text */
+  --text-muted: #475569;      /* Slate 600 for secondary text */
+  --border: #cbd5e1;          /* Slate 300 for readable borders */
+  --bg-input: #ffffff;
+
+  /* Theme-aware variables from user request */
+  --bg-color: var(--bg-body);
+  --card-bg: var(--bg-card);
+  --text-primary: var(--text-main);
+  --text-secondary: var(--text-muted);
+  --border-color: var(--border);
+
+  /* Keep navbar dark even in light mode */
+  --bg-nav: #0b0f19;
+  --text-nav: #f1f5f9;
+  --text-nav-muted: #94a3b8;
+  --border-nav: #1e293b;
+
+  --card-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+
+  /* Hero / Banner specific variables (Light Mode) */
+  --bg-hero: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+  --border-hero: #c7d2fe;
+  --text-hero-main: #1e1b4b;
+  --text-hero-muted: #4f46e5;
+}
+
+/* Global transitions and theme bindings */
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Ensure global scrollbar matches theme */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+/* Global Theme Toggle Button (styled for dark navbar) */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-nav);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+.theme-toggle-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
