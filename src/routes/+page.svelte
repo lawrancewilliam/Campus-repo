@@ -271,7 +271,7 @@
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; 2023 CampusRepo. All rights reserved. | MCA Mini Project</p>
+                <p>&copy; 2026 CampusRepo. All rights reserved. | MCA Mini Project</p>
             </div>
         </div>
     </footer>
