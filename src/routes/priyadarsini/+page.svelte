@@ -1,1 +1,1 @@
-this is priya page
+this page contains priya details 
