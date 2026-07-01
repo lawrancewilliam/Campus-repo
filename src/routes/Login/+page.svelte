@@ -94,8 +94,8 @@
             }
 
             if (currentRole === 'admin') {
-                const studentsList = getStudents();
-                const student = studentsList.find(s => (s.registerNumber === identifier || s.email === identifier) && s.password === password);
+                const studentsList = await getStudents();
+                const student = studentsList.find(s => s.registerNumber === identifier || s.email === identifier);
                 if (student) {
                     showToast("This account belongs to a Student. Please switch to Student Login Mode.", "error");
                     isLoading = false;
@@ -103,7 +103,7 @@
                 }
             }
 
-            const result = loginUser(identifier, password);
+            const result = await loginUser(identifier, password);
 
             if (result.success) {
                 showToast("Login Successful!", "success");

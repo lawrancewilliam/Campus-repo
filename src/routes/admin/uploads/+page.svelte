@@ -33,9 +33,9 @@
         })
     );
 
-    function loadData() {
+    async function loadData() {
         session = getCurrentSession();
-        projects = getProjects();
+        projects = await getProjects();
     }
 
     onMount(() => {
@@ -43,30 +43,30 @@
         mounted = true;
     });
 
-    function handleDeleteProject(id, title) {
+    async function handleDeleteProject(id, title) {
         if (confirm(`Are you sure you want to delete the project "${title}"? This action is permanent and will remove it from the platform.`)) {
-            deleteProject(id);
+            await deleteProject(id);
             toastState.show(`Project "${title}" has been deleted.`, "success", "✅ Project Deleted");
-            loadData();
+            await loadData();
         }
     }
 
-    function simulateDownload(project) {
-        incrementProjectDownloads(project.id);
+    async function simulateDownload(project) {
+        await incrementProjectDownloads(project.id);
         toastState.show(`Downloaded: ${project.fileName || 'source_code.zip'} successfully.`, "success", "✅ File Downloaded");
-        loadData();
+        await loadData();
     }
 
-    function toggleFlag(project, flagName) {
+    async function toggleFlag(project, flagName) {
         const updatedValue = !project[flagName];
-        const res = updateProject(project.id, { [flagName]: updatedValue });
+        const res = await updateProject(project.id, { [flagName]: updatedValue });
         if (res.success) {
             toastState.show(
                 `"${project.title}" flag "${flagName}" set to ${updatedValue ? 'ON' : 'OFF'}`,
                 "success",
                 "✅ Project Flag Updated"
             );
-            loadData();
+            await loadData();
         }
     }
 
@@ -80,13 +80,13 @@
         projectToEdit = null;
     }
 
-    function saveProjectEdit() {
+    async function saveProjectEdit() {
         if (!projectToEdit.title || !projectToEdit.abstract) {
             alert("Title and abstract are required.");
             return;
         }
         
-        const res = updateProject(projectToEdit.id, {
+        const res = await updateProject(projectToEdit.id, {
             title: projectToEdit.title,
             abstract: projectToEdit.abstract,
             category: projectToEdit.category,
@@ -96,7 +96,7 @@
         if (res.success) {
             toastState.show("Project details have been updated successfully.", "success", "✅ Project Updated");
             closeEditModal();
-            loadData();
+            await loadData();
         } else {
             alert(res.message || "Failed to update project.");
         }

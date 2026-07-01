@@ -93,7 +93,7 @@
         isLoading = true;
 
         try {
-            const result = registerStudent({
+            const result = await registerStudent({
                 name: `${formData.firstname} ${formData.lastname}`,
                 email: formData.email,
                 mobile: formData.mobile,
