@@ -503,7 +503,7 @@
                             bind:value={password} 
                             required
                         >
-                        <button type="button" class="password-toggle" onclick={togglePassword}>
+                        <button type="button" class="password-toggle" onclick={togglePassword} aria-label="Toggle password visibility">
                             <i class="fa-solid {passwordVisible ? 'fa-eye-slash' : 'fa-eye'}"></i>
                         </button>
                     </div>
@@ -515,7 +515,7 @@
                         <input type="checkbox" bind:checked={rememberMe}>
                         <span>Remember me</span>
                     </label>
-                    <a href="#" class="forgot-link" onclick={(e) => { e.preventDefault(); forgotPassword(); }}>Forgot Password?</a>
+                    <button type="button" class="forgot-link" style="background: none; border: none; padding: 0; font-family: inherit; font-size: inherit; cursor: pointer;" onclick={forgotPassword}>Forgot Password?</button>
                 </div>
 
                 <!-- Submit Button -->

@@ -121,7 +121,7 @@
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Uploaded:</span>
-                        <span class="detail-value">{project.date}</span>
+                        <span class="detail-value">{project.date || (project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A')}</span>
                     </div>
                 </div>
 

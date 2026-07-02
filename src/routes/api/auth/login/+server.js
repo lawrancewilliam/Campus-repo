@@ -1,5 +1,5 @@
-import { adminDb } from '$lib/firebase-admin.server.js';
-import { comparePassword, generateToken } from '$lib/auth.server.js';
+import { adminDb, FieldValue } from '$lib/firebase-admin.server.js';
+import { hashPassword, comparePassword, generateToken } from '$lib/auth.server.js';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ request, cookies }) {
@@ -50,14 +50,45 @@ export async function POST({ request, cookies }) {
         
         if (student) {
             let isValid = false;
-            if (student.hashedPassword) {
+            let needsMigration = false;
+            let migrationHash = null;
+
+            if (student.passwordHash) {
+                // Production-ready check
+                isValid = await comparePassword(password, student.passwordHash);
+            } else if (student.hashedPassword) {
+                // Verify legacy bcrypt hash
                 isValid = await comparePassword(password, student.hashedPassword);
+                if (isValid) {
+                    needsMigration = true;
+                    migrationHash = student.hashedPassword;
+                }
             } else if (student.password) {
                 // Legacy plain text check (allows smooth migration)
                 isValid = student.password === password;
+                if (isValid) {
+                    needsMigration = true;
+                    // Hash passwords using bcrypt with saltRounds = 10
+                    migrationHash = await hashPassword(password);
+                }
             }
 
             if (isValid) {
+                // If migration is required, update the student document to store passwordHash only
+                if (needsMigration && migrationHash) {
+                    const studentDocRef = studentsRef.doc(student.registerNumber);
+                    await studentDocRef.update({
+                        passwordHash: migrationHash,
+                        password: FieldValue.delete(),
+                        hashedPassword: FieldValue.delete()
+                    });
+
+                    // Update local student object to reflect database state
+                    student.passwordHash = migrationHash;
+                    delete student.password;
+                    delete student.hashedPassword;
+                }
+
                 const token = generateToken({
                     userId: student.registerNumber,
                     registerNumber: student.registerNumber,
@@ -76,7 +107,7 @@ export async function POST({ request, cookies }) {
                 });
 
                 // Clean sensitive credentials before returning
-                const { password: _, hashedPassword: __, ...safeUser } = student;
+                const { password: _, hashedPassword: __, passwordHash: ___, ...safeUser } = student;
                 const session = { role: 'student', user: safeUser };
                 
                 return json({ success: true, role: 'student', session, token });

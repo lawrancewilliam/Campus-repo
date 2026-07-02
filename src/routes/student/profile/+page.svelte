@@ -78,10 +78,6 @@
             alert("Please fill all password fields.");
             return;
         }
-        if (passwordForm.current !== session.user.password) {
-            alert("Current password is incorrect.");
-            return;
-        }
         if (passwordForm.new !== passwordForm.confirm) {
             alert("New passwords do not match.");
             return;
@@ -91,7 +87,10 @@
             return;
         }
         
-        const res = await updateStudentProfile(user.registerNumber, { password: passwordForm.new });
+        const res = await updateStudentProfile(user.registerNumber, {
+            currentPassword: passwordForm.current,
+            newPassword: passwordForm.new
+        });
         if (res.success) {
             alert("Password changed successfully!");
             passwordForm = { current: '', new: '', confirm: '' };

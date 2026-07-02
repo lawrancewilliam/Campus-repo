@@ -1,7 +1,6 @@
-import { adminDb } from '$lib/firebase-admin.server.js';
+import { adminDb, FieldValue } from '$lib/firebase-admin.server.js';
 import { hashPassword, comparePassword } from '$lib/auth.server.js';
 import { json } from '@sveltejs/kit';
-import { FieldValue } from 'firebase-admin/firestore';
 
 export async function GET() {
     try {
@@ -9,7 +8,7 @@ export async function GET() {
         const students = studentsSnap.docs.map(doc => {
             const data = doc.data();
             // Sanitize sensitive credentials
-            const { password, hashedPassword, ...safeData } = data;
+            const { password, hashedPassword, passwordHash, ...safeData } = data;
             return safeData;
         });
         return json(students);
@@ -53,7 +52,9 @@ export async function PUT({ request, locals }) {
             const student = docSnap.data();
 
             let isValid = false;
-            if (student.hashedPassword) {
+            if (student.passwordHash) {
+                isValid = await comparePassword(currentPassword, student.passwordHash);
+            } else if (student.hashedPassword) {
                 isValid = await comparePassword(currentPassword, student.hashedPassword);
             } else if (student.password) {
                 // Legacy plain text check
@@ -64,12 +65,13 @@ export async function PUT({ request, locals }) {
                 return json({ success: false, message: 'Current password is incorrect.' }, { status: 400 });
             }
 
-            // Hash the new password
+            // Hash the new password with bcrypt
             const newHashed = await hashPassword(newPassword);
-            updatedData.hashedPassword = newHashed;
+            updatedData.passwordHash = newHashed;
             
-            // Delete legacy field if it exists
+            // Delete legacy fields if they exist
             updatedData.password = FieldValue.delete();
+            updatedData.hashedPassword = FieldValue.delete();
 
             // Clear password forms payload
             delete updatedData.currentPassword;

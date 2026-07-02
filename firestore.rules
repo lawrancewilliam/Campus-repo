@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==========================================
+    // OPTION A (RECOMMENDED): BACKEND-ONLY ARCHITECTURE
+    // ==========================================
+    // Since the system utilizes SvelteKit endpoint APIs and an Express backend, 
+    // all database actions are mediated securely via the Firebase Admin SDK.
+    // Disallowing direct frontend/client SDK access completely eliminates data leaks.
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ==========================================
+    // OPTION B (ALTERNATIVE): SECURE CLIENT-SIDE ACCESS
+    // ==========================================
+    // If you plan to read/write collections directly from the client side in the future:
+    
+    /*
+    // 1. Students collection rules:
+    // - Only allow the authenticated student to read or write their own document.
+    // - Never allow listing (querying) the whole students collection.
+    // - Since rules are document-level, only the owner can read their document (which contains passwordHash).
+    match /students/{registerNumber} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == registerNumber;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.registerNumber;
+    }
+
+    // 2. Projects collection rules:
+    // - Anyone (including unauthenticated visitors) can read public projects.
+    // - Only logged-in students can create projects.
+    // - Only the author of the project can update or delete it.
+    match /projects/{projectId} {
+      allow read: if resource.data.visibility == 'Public' || (request.auth != null && resource.data.authorRegNo == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.authorRegNo == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.authorRegNo == request.auth.uid;
+    }
+
+    // 3. Activities collection rules:
+    // - Authenticated students can read the activity log.
+    // - Authenticated students can write/log new activities.
+    // - No one is allowed to edit or delete logged activities (immutability).
+    match /activities/{activityId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if false;
+    }
+    */
+  }
+}

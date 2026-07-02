@@ -1,10 +1,9 @@
-import { db } from '$lib/firebase.server.js';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { adminDb } from '$lib/firebase-admin.server.js';
 import { json } from '@sveltejs/kit';
 
 export async function GET() {
     try {
-        const snap = await getDocs(collection(db, 'activities'));
+        const snap = await adminDb.collection('activities').get();
         const activities = snap.docs.map(doc => doc.data());
         
         // Sort in-memory by timestamp descending to avoid Firestore index setup requirement
@@ -33,10 +32,11 @@ export async function POST({ request }) {
             timestamp: Date.now()
         };
         
-        await addDoc(collection(db, 'activities'), newActivity);
+        await adminDb.collection('activities').add(newActivity);
         return json({ success: true });
     } catch (e) {
         console.error('Error logging activity:', e);
         return json({ success: false, message: e.message }, { status: 500 });
     }
 }
+

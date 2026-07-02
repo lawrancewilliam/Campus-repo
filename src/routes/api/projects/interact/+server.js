@@ -1,5 +1,4 @@
-import { db } from '$lib/firebase.server.js';
-import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { adminDb, FieldValue } from '$lib/firebase-admin.server.js';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
@@ -10,23 +9,23 @@ export async function POST({ request }) {
             return json({ success: false, message: 'Missing action or projectId.' }, { status: 400 });
         }
         
-        const projectRef = doc(db, 'projects', String(projectId));
+        const projectRef = adminDb.collection('projects').doc(String(projectId));
         
         // 1. Increment Project Views
         if (action === 'view') {
-            await updateDoc(projectRef, {
-                views: increment(1)
+            await projectRef.update({
+                views: FieldValue.increment(1)
             });
-            const snap = await getDoc(projectRef);
+            const snap = await projectRef.get();
             return json({ success: true, count: snap.data()?.views || 0 });
         }
         
         // 2. Increment Project Downloads
         if (action === 'download') {
-            await updateDoc(projectRef, {
-                downloadsCount: increment(1)
+            await projectRef.update({
+                downloadsCount: FieldValue.increment(1)
             });
-            const snap = await getDoc(projectRef);
+            const snap = await projectRef.get();
             return json({ success: true, count: snap.data()?.downloadsCount || 0 });
         }
         
@@ -36,10 +35,10 @@ export async function POST({ request }) {
                 return json({ success: false, message: 'Missing regNo for bookmark action.' }, { status: 400 });
             }
             
-            const studentRef = doc(db, 'students', regNo);
-            const studentSnap = await getDoc(studentRef);
+            const studentRef = adminDb.collection('students').doc(regNo);
+            const studentSnap = await studentRef.get();
             
-            if (!studentSnap.exists()) {
+            if (!studentSnap.exists) {
                 return json({ success: false, message: 'Student not found.' }, { status: 404 });
             }
             
@@ -58,13 +57,13 @@ export async function POST({ request }) {
                 bookmarks.splice(index, 1);
             }
             
-            await updateDoc(studentRef, {
+            await studentRef.update({
                 bookmarkedProjectIds: bookmarks
             });
             
             // Retrieve updated student profile to return for session update
-            const updatedStudentSnap = await getDoc(studentRef);
-            const { password: _, hashedPassword: __, salt: ___, ...safeStudent } = updatedStudentSnap.data();
+            const updatedStudentSnap = await studentRef.get();
+            const { password: _, hashedPassword: __, passwordHash: ___, salt: ____, ...safeStudent } = updatedStudentSnap.data();
             
             return json({ 
                 success: true, 
@@ -79,3 +78,4 @@ export async function POST({ request }) {
         return json({ success: false, message: e.message }, { status: 500 });
     }
 }
+

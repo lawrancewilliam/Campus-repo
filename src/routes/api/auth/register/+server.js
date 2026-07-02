@@ -32,7 +32,7 @@ export async function POST({ request, cookies }) {
             userId: student.registerNumber,
             username: student.name,
             email: student.email,
-            hashedPassword: hashedPassword,
+            passwordHash: hashedPassword,
             createdAt: new Date().toISOString(),
 
             // Legacy fields for compatibility
@@ -69,7 +69,7 @@ export async function POST({ request, cookies }) {
         });
         
         // Strip sensitive password before returning
-        const { hashedPassword: _, ...safeUser } = newStudent;
+        const { passwordHash: _, ...safeUser } = newStudent;
         const session = { role: 'student', user: safeUser };
 
         return json({ success: true, token, session });
