@@ -10,29 +10,9 @@ export async function POST({ request, cookies }) {
             return json({ success: false, message: 'Missing username or password.' }, { status: 400 });
         }
 
-        // 1. Admin login check
-        if (username === '12345' && password === 'William26') {
-            const token = generateToken({
-                userId: '12345',
-                registerNumber: '12345',
-                username: 'Admin',
-                role: 'admin'
-            });
-
-            cookies.set('token', token, {
-                path: '/',
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 60 * 60 * 24 * 7 // 1 week
-            });
-
-            const session = { role: 'admin', user: { name: 'Admin', registerNumber: '12345' } };
-            return json({ success: true, role: 'admin', session, token });
-        }
-        
-        // 2. Student login check
+        // Unified login check for students and admins
         let student = null;
+        let studentDocRef = null;
         const studentsRef = adminDb.collection('students');
         
         // Attempt search by register number (document ID)
@@ -40,10 +20,12 @@ export async function POST({ request, cookies }) {
         
         if (docSnap.exists) {
             student = docSnap.data();
+            studentDocRef = docSnap.ref; // Ensure ref is set when found by doc ID
         } else {
             // Attempt search by email
             const querySnap = await studentsRef.where('email', '==', username).limit(1).get();
             if (!querySnap.empty) {
+                studentDocRef = querySnap.docs[0].ref;
                 student = querySnap.docs[0].data();
             }
         }
@@ -76,7 +58,7 @@ export async function POST({ request, cookies }) {
             if (isValid) {
                 // If migration is required, update the student document to store passwordHash only
                 if (needsMigration && migrationHash) {
-                    const studentDocRef = studentsRef.doc(student.registerNumber);
+                    // studentDocRef is now guaranteed to be set from the initial lookup
                     await studentDocRef.update({
                         passwordHash: migrationHash,
                         password: FieldValue.delete(),
@@ -89,13 +71,15 @@ export async function POST({ request, cookies }) {
                     delete student.hashedPassword;
                 }
 
+                const userRole = student.role || 'student'; // Default to 'student' if role is not set
+
                 const token = generateToken({
                     userId: student.registerNumber,
                     registerNumber: student.registerNumber,
                     email: student.email,
                     username: student.name,
-                    role: 'student',
-                    department: student.department || 'CSE'
+                    role: userRole,
+                    department: student.department
                 });
 
                 cookies.set('token', token, {
@@ -108,9 +92,9 @@ export async function POST({ request, cookies }) {
 
                 // Clean sensitive credentials before returning
                 const { password: _, hashedPassword: __, passwordHash: ___, ...safeUser } = student;
-                const session = { role: 'student', user: safeUser };
+                const session = { role: userRole, user: safeUser };
                 
-                return json({ success: true, role: 'student', session, token });
+                return json({ success: true, role: userRole, session, token });
             }
         }
         

@@ -1,4 +1,4 @@
-import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getApps, initializeApp, cert as firebaseCert } from 'firebase-admin/app';
 import { getFirestore, FieldValue as AdminFieldValue } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { 
@@ -172,6 +172,7 @@ class MockFirestore {
     constructor() {
         this.dbPath = path.resolve(process.cwd(), 'local-db.json');
         this.initDb();
+        console.log(`ℹ️ [Mock Database Path] Resolving database file to: ${this.dbPath}`);
     }
     initDb() {
         if (!fs.existsSync(this.dbPath)) {
@@ -248,7 +249,7 @@ if (isConfigured) {
     if (getApps().length === 0) {
         try {
             app = initializeApp({
-                credential: cert({
+                credential: firebaseCert({
                     projectId: FIREBASE_PROJECT_ID,
                     clientEmail,
                     privateKey
@@ -268,11 +269,13 @@ if (isConfigured) {
     console.warn('⚠️ FIREBASE_CLIENT_EMAIL and/or FIREBASE_PRIVATE_KEY are missing from env. Using local Mock Database & Storage fallbacks.');
     adminDbVal = new MockFirestore();
     adminStorageVal = new MockStorage();
+    console.log(`ℹ️ [Local Database Config] Student details and project metadata will save to: ${path.resolve(process.cwd(), 'local-db.json')}`);
+    console.log(`ℹ️ [Local Storage Config] Project files will upload to directory: ${path.resolve(process.cwd(), 'static', 'uploads')}`);
 }
 
 export const adminDb = adminDbVal;
 export const adminStorage = adminStorageVal;
-export const cert = isConfigured ? cert : null;
+export const cert = isConfigured ? firebaseCert : null;
 
 const FieldValueMock = {
     delete: () => ({ _type: 'delete' }),

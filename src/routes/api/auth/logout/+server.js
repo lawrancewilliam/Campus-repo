@@ -1,8 +1,14 @@
 import { json } from '@sveltejs/kit';
 
+/**
+ * Handles user logout by clearing the session cookie.
+ */
 export async function POST({ cookies }) {
-    // Delete the JWT cookie
-    cookies.delete('token', { path: '/' });
-    
-    return json({ success: true, message: 'Logged out successfully.' });
+	// Clear the 'token' cookie by setting its maxAge to 0.
+	cookies.set('token', '', {
+		path: '/',
+		maxAge: 0
+	});
+
+	return json({ success: true, message: 'Logged out successfully.' });
 }
