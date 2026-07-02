@@ -31,9 +31,9 @@
         })
     );
 
-    function loadData() {
+    async function loadData() {
         session = getCurrentSession();
-        projects = getProjects();
+        projects = await getProjects();
     }
 
     onMount(() => {
@@ -41,21 +41,21 @@
         mounted = true;
     });
 
-    function handleToggleBookmark(id) {
+    async function handleToggleBookmark(id) {
         if (session && session.user) {
-            toggleBookmark(id, session.user.registerNumber);
-            loadData();
+            await toggleBookmark(id, session.user.registerNumber);
+            await loadData();
         }
     }
 
-    function simulateDownload(project) {
-        incrementProjectDownloads(project.id);
+    async function simulateDownload(project) {
+        await incrementProjectDownloads(project.id);
         toastState.show(
             `Project ZIP file "${project.fileName || 'source_code.zip'}" downloaded.`, 
             "success", 
             "✅ Download Successful"
         );
-        loadData();
+        await loadData();
     }
 </script>
 

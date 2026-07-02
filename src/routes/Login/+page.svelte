@@ -94,8 +94,8 @@
             }
 
             if (currentRole === 'admin') {
-                const studentsList = getStudents();
-                const student = studentsList.find(s => (s.registerNumber === identifier || s.email === identifier) && s.password === password);
+                const studentsList = await getStudents();
+                const student = studentsList.find(s => s.registerNumber === identifier || s.email === identifier);
                 if (student) {
                     showToast("This account belongs to a Student. Please switch to Student Login Mode.", "error");
                     isLoading = false;
@@ -103,7 +103,7 @@
                 }
             }
 
-            const result = loginUser(identifier, password);
+            const result = await loginUser(identifier, password);
 
             if (result.success) {
                 showToast("Login Successful!", "success");
@@ -503,7 +503,7 @@
                             bind:value={password} 
                             required
                         >
-                        <button type="button" class="password-toggle" onclick={togglePassword}>
+                        <button type="button" class="password-toggle" onclick={togglePassword} aria-label="Toggle password visibility">
                             <i class="fa-solid {passwordVisible ? 'fa-eye-slash' : 'fa-eye'}"></i>
                         </button>
                     </div>
@@ -515,7 +515,7 @@
                         <input type="checkbox" bind:checked={rememberMe}>
                         <span>Remember me</span>
                     </label>
-                    <a href="#" class="forgot-link" onclick={(e) => { e.preventDefault(); forgotPassword(); }}>Forgot Password?</a>
+                    <button type="button" class="forgot-link" style="background: none; border: none; padding: 0; font-family: inherit; font-size: inherit; cursor: pointer;" onclick={forgotPassword}>Forgot Password?</button>
                 </div>
 
                 <!-- Submit Button -->

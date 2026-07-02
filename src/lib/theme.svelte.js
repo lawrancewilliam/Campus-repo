@@ -1,10 +1,6 @@
-let currentTheme = $state('dark');
-
-// Safe init on client import
-if (typeof window !== 'undefined') {
-    currentTheme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-}
+let currentTheme = $state(
+    typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'dark') : 'dark'
+);
 
 export const themeState = {
     get theme() {
@@ -19,8 +15,8 @@ export const themeState = {
     },
     init() {
         if (typeof window !== 'undefined') {
-            currentTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', currentTheme);
         }
     }
 };
+

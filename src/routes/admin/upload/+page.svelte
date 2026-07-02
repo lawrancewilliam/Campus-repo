@@ -38,16 +38,22 @@
         "Internet of Things", "Cyber Security"
     ];
 
-    onMount(() => {
+    onMount(async () => {
         session = getCurrentSession();
-        students = getStudents();
+        students = await getStudents();
         mounted = true;
     });
 
     function handleFileSelect(event, type) {
         const selectedFile = event.target.files[0];
         if (selectedFile) {
-            files[type] = selectedFile.name;
+            // Check file size (100MB limit)
+            const maxFileSize = 100 * 1024 * 1024;
+            if (selectedFile.size > maxFileSize) {
+                alert("File size exceeds 100MB limit.");
+                return;
+            }
+            files[type] = selectedFile;
         }
     }
 
@@ -55,15 +61,22 @@
         document.getElementById(inputId).click();
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
         if (!formData.title || !formData.abstract || !formData.domain) {
             alert("Please fill in the required fields (Title, Abstract, Domain).");
             return;
         }
 
+        // Determine which file is the primary file to upload
+        const fileToUpload = files.sourceCode || files.report || files.presentation || files.readme;
+        if (!fileToUpload) {
+            alert("Please select at least one file to upload (Source Code ZIP, Report PDF, or Presentation PPT).");
+            return;
+        }
+
         isUploading = true;
 
-        setTimeout(() => {
+        try {
             let authorUser = { name: 'Admin', registerNumber: '12345', department: 'Admin' };
             
             if (formData.selectedAuthor !== 'admin') {
@@ -76,21 +89,24 @@
             const projectData = {
                 title: formData.title,
                 abstract: formData.abstract,
-                category: formData.domain,
-                visibility: formData.visibility,
-                fileName: files.sourceCode || "source_code.zip"
+                domain: formData.domain,
+                visibility: formData.visibility
             };
 
-            const result = uploadProject(projectData, authorUser);
+            const result = await uploadProject(projectData, fileToUpload, authorUser);
             isUploading = false;
             
             if (result.success) {
                 toastState.show("Your project has been saved and is now available for viewing.", "success");
                 window.location.href = '/admin/dashboard';
             } else {
-                alert("Upload failed. Please try again.");
+                alert(result.message || "Upload failed. Please try again.");
             }
-        }, 1200);
+        } catch (err) {
+            isUploading = false;
+            console.error(err);
+            alert("An error occurred during upload.");
+        }
     }
 
     function handleTagKeydown(event) {
@@ -234,7 +250,7 @@
                             <i class="fa-solid fa-file-zipper" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>Source Code (ZIP)</h4>
-                                <p>{files.sourceCode ? files.sourceCode : 'Max 50MB'}</p>
+                                <p>{files.sourceCode ? files.sourceCode.name : 'Max 100MB'}</p>
                             </div>
                             <i class="fa-solid fa-upload" aria-hidden="true"></i>
                         </div>
@@ -245,7 +261,7 @@
                             <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>Final Report (PDF)</h4>
-                                <p>{files.report ? files.report : 'Required'}</p>
+                                <p>{files.report ? files.report.name : 'Required'}</p>
                             </div>
                             <i class="fa-solid fa-upload" aria-hidden="true"></i>
                         </div>
@@ -256,7 +272,7 @@
                             <i class="fa-solid fa-file-powerpoint" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>Presentation (PPT)</h4>
-                                <p>{files.presentation ? files.presentation : 'Optional'}</p>
+                                <p>{files.presentation ? files.presentation.name : 'Optional'}</p>
                             </div>
                             <i class="fa-solid fa-upload" aria-hidden="true"></i>
                         </div>
@@ -267,7 +283,7 @@
                             <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>README File</h4>
-                                <p>{files.readme ? files.readme : 'Recommended'}</p>
+                                <p>{files.readme ? files.readme.name : 'Recommended'}</p>
                             </div>
                             <i class="fa-solid fa-upload" aria-hidden="true"></i>
                         </div>

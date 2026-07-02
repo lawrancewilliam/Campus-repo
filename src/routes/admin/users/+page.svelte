@@ -45,10 +45,10 @@
         )
     );
 
-    function loadData() {
+    async function loadData() {
         session = getCurrentSession();
-        students = getStudents();
-        projects = getProjects();
+        students = await getStudents();
+        projects = await getProjects();
     }
 
     onMount(() => {
@@ -61,12 +61,12 @@
         isEditing = false;
     }
 
-    function handleDeleteStudent(regNo, name) {
+    async function handleDeleteStudent(regNo, name) {
         if (confirm(`Are you sure you want to delete ${name}'s account? This will permanently delete their student profile and all of their uploaded projects.`)) {
-            deleteStudent(regNo);
+            await deleteStudent(regNo);
             toastState.show(`Student account "${name}" has been deleted.`, "success", "✅ Account Deleted");
             selectedStudentRegNo = null;
-            loadData();
+            await loadData();
         }
     }
 
@@ -86,13 +86,13 @@
         isEditing = false;
     }
 
-    function saveStudentDetails() {
+    async function saveStudentDetails() {
         if (!editForm.name || !editForm.email) {
             alert("Name and email are required.");
             return;
         }
 
-        const res = updateStudentProfile(selectedStudentRegNo, {
+        const res = await updateStudentProfile(selectedStudentRegNo, {
             name: editForm.name,
             email: editForm.email,
             department: editForm.department,
@@ -103,41 +103,41 @@
         if (res.success) {
             toastState.show(`Profile details for ${editForm.name} updated successfully.`, "success", "✅ Profile Updated");
             isEditing = false;
-            loadData();
+            await loadData();
         } else {
             alert(res.message || "Failed to update profile.");
         }
     }
 
-    function handleToggleProjectFlag(projectId, flagKey) {
+    async function handleToggleProjectFlag(projectId, flagKey) {
         const project = projects.find(p => p.id === projectId);
         if (!project) return;
         
         const updatedValue = !project[flagKey];
-        const res = updateProject(projectId, { [flagKey]: updatedValue });
+        const res = await updateProject(projectId, { [flagKey]: updatedValue });
         
         if (res.success) {
             const flagName = flagKey === 'recommended' ? 'Recommended' : (flagKey === 'featured' ? 'Featured' : 'Home Page');
             const status = updatedValue ? 'enabled' : 'disabled';
             toastState.show(`Project "${project.title}" ${flagName} status ${status}.`, "success", "✅ Status Updated");
-            loadData();
+            await loadData();
         } else {
             alert("Failed to update project status.");
         }
     }
 
-    function handleDeleteProject(projectId, title) {
+    async function handleDeleteProject(projectId, title) {
         if (confirm(`Are you sure you want to delete project "${title}"? This action cannot be undone.`)) {
-            deleteProject(projectId);
+            await deleteProject(projectId);
             toastState.show(`Project "${title}" has been deleted.`, "success", "✅ Project Deleted");
-            loadData();
+            await loadData();
         }
     }
 
-    function handleDownload(project) {
-        incrementProjectDownloads(project.id);
+    async function handleDownload(project) {
+        await incrementProjectDownloads(project.id);
         toastState.show(`File "${project.fileName || 'source_code.zip'}" downloaded.`, "success", "✅ File Downloaded");
-        loadData();
+        await loadData();
     }
 
     function openViewModal(project) {

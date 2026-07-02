@@ -27,11 +27,11 @@
     let totalProjects = $derived(myProjects.length);
     let totalViews = $derived(myProjects.reduce((sum, p) => sum + p.views, 0));
 
-    function loadData() {
+    async function loadData() {
         session = getCurrentSession();
         if (session && session.user) {
             user = { ...session.user };
-            myProjects = getStudentProjects(session.user.registerNumber);
+            myProjects = await getStudentProjects(session.user.registerNumber);
         }
     }
 
@@ -50,13 +50,13 @@
         }
     }
 
-    function saveProfile() {
+    async function saveProfile() {
         if (!user.name || !user.email) {
             alert("Name and Email are required.");
             return;
         }
         
-        const res = updateStudentProfile(user.registerNumber, {
+        const res = await updateStudentProfile(user.registerNumber, {
             name: user.name,
             email: user.email,
             department: user.department,
@@ -67,19 +67,15 @@
         if (res.success) {
             alert("Profile updated successfully!");
             isEditing = false;
-            loadData();
+            await loadData();
         } else {
             alert(res.message || "Failed to update profile.");
         }
     }
 
-    function handleChangePassword() {
+    async function handleChangePassword() {
         if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
             alert("Please fill all password fields.");
-            return;
-        }
-        if (passwordForm.current !== session.user.password) {
-            alert("Current password is incorrect.");
             return;
         }
         if (passwordForm.new !== passwordForm.confirm) {
@@ -91,19 +87,22 @@
             return;
         }
         
-        const res = updateStudentProfile(user.registerNumber, { password: passwordForm.new });
+        const res = await updateStudentProfile(user.registerNumber, {
+            currentPassword: passwordForm.current,
+            newPassword: passwordForm.new
+        });
         if (res.success) {
             alert("Password changed successfully!");
             passwordForm = { current: '', new: '', confirm: '' };
-            loadData();
+            await loadData();
         } else {
             alert(res.message || "Failed to change password.");
         }
     }
 
-    function deleteAccount() {
+    async function deleteAccount() {
         if (confirm("Are you sure you want to delete your account? This will permanently delete all your uploaded projects and cannot be undone.")) {
-            deleteStudent(user.registerNumber);
+            await deleteStudent(user.registerNumber);
             alert("Your account has been deleted.");
             window.location.href = '/Login';
         }

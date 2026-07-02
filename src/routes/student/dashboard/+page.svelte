@@ -30,12 +30,13 @@
         allProjects.filter(p => (p.featured || p.recommended || p.homePage) && p.visibility === 'Public')
     );
 
-    function loadData() {
+    async function loadData() {
         session = getCurrentSession();
         if (session && session.user) {
-            myProjects = getStudentProjects(session.user.registerNumber);
-            allProjects = getProjects();
-            activityLog = getActivityLog().filter(a => a.text.includes(session.user.name) || a.text.includes("You"));
+            myProjects = await getStudentProjects(session.user.registerNumber);
+            allProjects = await getProjects();
+            const logs = await getActivityLog();
+            activityLog = logs.filter(a => a.text.includes(session.user.name) || a.text.includes("You"));
         }
     }
 
@@ -44,25 +45,25 @@
         mounted = true;
     });
 
-    function handleDelete(id, title) {
+    async function handleDelete(id, title) {
         if (confirm("Are you sure you want to delete this project?")) {
-            deleteProject(id);
+            await deleteProject(id);
             toastState.show(`Project "${title}" has been deleted.`, "success", "✅ Project Deleted");
-            loadData();
+            await loadData();
         }
     }
 
-    function handleToggleBookmark(id) {
+    async function handleToggleBookmark(id) {
         if (session && session.user) {
-            toggleBookmark(id, session.user.registerNumber);
-            loadData();
+            await toggleBookmark(id, session.user.registerNumber);
+            await loadData();
         }
     }
 
-    function handleDownload(project) {
-        incrementProjectDownloads(project.id);
+    async function handleDownload(project) {
+        await incrementProjectDownloads(project.id);
         toastState.show(`File "${project.fileName}" has been downloaded.`, "success", "✅ File Downloaded");
-        loadData();
+        await loadData();
     }
 
     function openEditModal(project) {
@@ -75,13 +76,13 @@
         projectToEdit = null;
     }
 
-    function saveProjectEdit() {
+    async function saveProjectEdit() {
         if (!projectToEdit.title || !projectToEdit.abstract) {
             alert("Title and abstract are required.");
             return;
         }
 
-        const res = updateProject(projectToEdit.id, {
+        const res = await updateProject(projectToEdit.id, {
             title: projectToEdit.title,
             abstract: projectToEdit.abstract,
             category: projectToEdit.category,
@@ -91,7 +92,7 @@
         if (res.success) {
             toastState.show("Project details have been updated successfully.", "success", "✅ Project Updated");
             closeEditModal();
-            loadData();
+            await loadData();
         } else {
             alert(res.message || "Failed to update project.");
         }

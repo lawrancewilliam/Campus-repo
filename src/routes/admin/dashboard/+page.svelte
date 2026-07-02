@@ -18,11 +18,11 @@
     let categoryDistribution = $derived(getDistribution(projects, 'category'));
     let departmentDistribution = $derived(getDistribution(projects, 'dept'));
 
-    function loadData() {
+    async function loadData() {
         session = getCurrentSession();
-        projects = getProjects();
-        students = getStudents();
-        activityLog = getActivityLog();
+        projects = await getProjects();
+        students = await getStudents();
+        activityLog = await getActivityLog();
     }
 
     onMount(() => {

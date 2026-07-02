@@ -21,10 +21,10 @@
         "Internet of Things", "Cyber Security"
     ];
 
-    function loadData() {
+    async function loadData() {
         session = getCurrentSession();
         if (session && session.user) {
-            myProjects = getStudentProjects(session.user.registerNumber);
+            myProjects = await getStudentProjects(session.user.registerNumber);
         }
     }
 
@@ -33,18 +33,18 @@
         mounted = true;
     });
 
-    function handleDelete(id, title) {
+    async function handleDelete(id, title) {
         if (confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
-            deleteProject(id);
+            await deleteProject(id);
             toastState.show(`Project "${title}" has been deleted.`, "success", "✅ Project Deleted");
-            loadData();
+            await loadData();
         }
     }
 
-    function handleDownload(project) {
-        incrementProjectDownloads(project.id);
+    async function handleDownload(project) {
+        await incrementProjectDownloads(project.id);
         toastState.show(`File "${project.fileName || 'source_code.zip'}" downloaded.`, "success", "✅ File Downloaded");
-        loadData();
+        await loadData();
     }
 
     function openEditModal(project) {
@@ -67,13 +67,13 @@
         projectToView = null;
     }
 
-    function saveProjectEdit() {
+    async function saveProjectEdit() {
         if (!projectToEdit.title || !projectToEdit.abstract) {
             alert("Title and abstract are required.");
             return;
         }
 
-        const res = updateProject(projectToEdit.id, {
+        const res = await updateProject(projectToEdit.id, {
             title: projectToEdit.title,
             abstract: projectToEdit.abstract,
             category: projectToEdit.category,
@@ -83,7 +83,7 @@
         if (res.success) {
             toastState.show("Project details have been updated successfully.", "success", "✅ Project Updated");
             closeEditModal();
-            loadData();
+            await loadData();
         } else {
             alert(res.message || "Failed to update project.");
         }
@@ -121,7 +121,7 @@
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Uploaded:</span>
-                        <span class="detail-value">{project.date}</span>
+                        <span class="detail-value">{project.date || (project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A')}</span>
                     </div>
                 </div>
 
