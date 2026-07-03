@@ -1,5 +1,7 @@
 import { adminDb, adminStorage } from '$lib/firebase-admin.server.js';
 import { json } from '@sveltejs/kit';
+import fs from 'fs';
+import path from 'path';
 
 // Seed data function to prepopulate Firestore if empty (now utilizing Admin SDK)
 async function checkAndSeed() {
@@ -147,14 +149,27 @@ export async function DELETE({ request, locals }) {
             return json({ success: false, message: 'Forbidden. You cannot delete this project.' }, { status: 403 });
         }
 
-        // Cascade delete from Firebase Storage if it exists
+        // Cascade delete from Firebase Storage or local disk if it exists
         if (project.storagePath) {
-            try {
-                const bucket = adminStorage.bucket();
-                await bucket.file(project.storagePath).delete();
-                console.log(`✅ Deleted associated file from Storage: ${project.storagePath}`);
-            } catch (err) {
-                console.error(`⚠️ Failed to delete storage file ${project.storagePath}:`, err.message);
+            if (project.storagePath.startsWith('local-uploads/')) {
+                try {
+                    const fileName = project.storagePath.split('/').pop();
+                    const localPath = path.resolve(process.cwd(), 'static', 'uploads', fileName);
+                    if (fs.existsSync(localPath)) {
+                        fs.unlinkSync(localPath);
+                        console.log(`✅ Deleted associated local file: ${localPath}`);
+                    }
+                } catch (err) {
+                    console.error(`⚠️ Failed to delete local file ${project.storagePath}:`, err.message);
+                }
+            } else {
+                try {
+                    const bucket = adminStorage.bucket();
+                    await bucket.file(project.storagePath).delete();
+                    console.log(`✅ Deleted associated file from Storage: ${project.storagePath}`);
+                } catch (err) {
+                    console.error(`⚠️ Failed to delete storage file ${project.storagePath}:`, err.message);
+                }
             }
         }
 

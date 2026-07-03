@@ -1,80 +1,65 @@
 import { adminDb } from '$lib/firebase-admin.server.js';
-import { hashPassword, generateToken } from '$lib/auth.server.js';
+import { hashPassword } from '$lib/auth.server.js';
 import { json } from '@sveltejs/kit';
 
-export async function POST({ request, cookies }) {
-    try {
-        const student = await request.json();
-        
-        if (!student.registerNumber || !student.email || !student.password || !student.name) {
-            return json({ success: false, message: 'Missing required registration fields.' }, { status: 400 });
-        }
+export async function POST({ request }) {
+	try {
+		const { registerNumber, name, email, password, department, academicYear, mobile } =
+			await request.json();
 
-        const studentsRef = adminDb.collection('students');
-        
-        // Check if register number already exists
-        const regSnap = await studentsRef.where('registerNumber', '==', student.registerNumber).get();
-        if (!regSnap.empty) {
-            return json({ success: false, message: 'Register Number already exists.' }, { status: 400 });
-        }
-        
-        // Check if email already exists
-        const emailSnap = await studentsRef.where('email', '==', student.email).get();
-        if (!emailSnap.empty) {
-            return json({ success: false, message: 'Email already exists.' }, { status: 400 });
-        }
+		// 1. Validation
+		if (!registerNumber || !email || !password || !name) {
+			return json(
+				{ success: false, message: 'Missing required registration fields.' },
+				{ status: 400 }
+			);
+		}
 
-        // Hash password with bcryptjs
-        const hashedPassword = await hashPassword(student.password);
-        
-        const newStudent = {
-            // New user schema
-            userId: student.registerNumber,
-            username: student.name,
-            email: student.email,
-            passwordHash: hashedPassword,
-            createdAt: new Date().toISOString(),
+		const studentsRef = adminDb.collection('students');
 
-            // Legacy fields for compatibility
-            name: student.name,
-            mobile: student.mobile || '',
-            registerNumber: student.registerNumber,
-            department: student.department || 'CSE',
-            academicYear: student.academicYear || '3rd Year',
-            bio: student.bio || 'No bio yet.',
-            joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-            bookmarkedProjectIds: []
-        };
-        
-        // Store in Firestore using register number as key
-        await studentsRef.doc(student.registerNumber).set(newStudent);
+		// 2. Check if Register Number already exists
+		const regSnap = await studentsRef.doc(registerNumber).get();
+		if (regSnap.exists) {
+			return json({ success: false, message: 'Register Number already exists.' }, { status: 400 });
+		}
 
-        // Generate JWT
-        const token = generateToken({
-            userId: student.registerNumber,
-            registerNumber: student.registerNumber,
-            email: student.email,
-            username: student.name,
-            role: 'student',
-            department: student.department || 'CSE'
-        });
+		// 3. Check if Email already exists
+		const emailSnap = await studentsRef.where('email', '==', email).limit(1).get();
+		if (!emailSnap.empty) {
+			return json({ success: false, message: 'Email already exists.' }, { status: 400 });
+		}
 
-        // Set secure HTTP-only cookie
-        cookies.set('token', token, {
-            path: '/',
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 7 // 1 week
-        });
-        
-        // Strip sensitive password before returning
-        const { passwordHash: _, ...safeUser } = newStudent;
-        const session = { role: 'student', user: safeUser };
+		// 4. Securely hash password
+		const passwordHash = await hashPassword(password);
 
-        return json({ success: true, token, session });
-    } catch (e) {
-        console.error('Registration error:', e);
-        return json({ success: false, message: e.message }, { status: 500 });
-    }
+		// 5. Build Student Document
+		const newStudent = {
+			userId: registerNumber,
+			username: name,
+			name: name,
+			email: email,
+			mobile: mobile || '',
+			registerNumber: registerNumber,
+			department: department || 'CSE',
+			academicYear: academicYear || '1st Year',
+			bio: 'No bio yet.',
+			joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+			bookmarkedProjectIds: [],
+			createdAt: new Date().toISOString(),
+			// Store passwordHash only
+			passwordHash: passwordHash
+		};
+
+		// 6. Save in Firestore
+		await studentsRef.doc(registerNumber).set(newStudent);
+
+		// 7. Sanitize credentials from response
+		const { passwordHash: _, ...safeUser } = newStudent;
+
+		return json({ success: true, message: 'Student registered successfully.', user: safeUser }, { status: 201 });
+
+	} catch (error) {
+		console.error('Registration error:', error);
+		return json({ success: false, message: 'Internal server error during registration.' }, { status: 500 });
+	}
 }

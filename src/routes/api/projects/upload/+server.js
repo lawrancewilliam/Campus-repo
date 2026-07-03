@@ -1,6 +1,8 @@
 import { adminDb, adminStorage } from '$lib/firebase-admin.server.js';
 import { json } from '@sveltejs/kit';
 import { FIREBASE_STORAGE_BUCKET } from '$env/static/private';
+import fs from 'fs';
+import path from 'path';
 
 export async function POST({ request, locals }) {
     try {
@@ -53,30 +55,51 @@ export async function POST({ request, locals }) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        const bucket = adminStorage.bucket();
-        const destinationPath = `campus-repo/${folder}/${Date.now()}_${file.name}`;
-        const storageFile = bucket.file(destinationPath);
-
-        // Upload file bytes to Firebase Storage
-        await storageFile.save(buffer, {
-            metadata: {
-                contentType: file.type || 'application/octet-stream'
-            }
-        });
-
-        // Generate download URL
         let downloadUrl = '';
+        let storagePath = '';
+
         try {
-            // Attempt to get long-lived signed URL
-            const [signedUrl] = await storageFile.getSignedUrl({
-                action: 'read',
-                expires: '03-09-2491' // far future
+            const bucket = adminStorage.bucket();
+            const destinationPath = `campus-repo/${folder}/${Date.now()}_${file.name}`;
+            const storageFile = bucket.file(destinationPath);
+
+            console.log('Attempting upload to Firebase Cloud Storage...');
+            // Upload file bytes to Firebase Storage
+            await storageFile.save(buffer, {
+                metadata: {
+                    contentType: file.type || 'application/octet-stream'
+                }
             });
-            downloadUrl = signedUrl;
-        } catch (signedErr) {
-            console.warn('⚠️ Service account credentials missing or insufficient. Falling back to public storage URL:', signedErr.message);
-            // Fallback public read URL (works if public read rules are active)
-            downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(destinationPath)}?alt=media`;
+
+            // Generate download URL
+            try {
+                // Attempt to get long-lived signed URL
+                const [signedUrl] = await storageFile.getSignedUrl({
+                    action: 'read',
+                    expires: '03-09-2491' // far future
+                });
+                downloadUrl = signedUrl;
+            } catch (signedErr) {
+                console.warn('⚠️ Service account credentials missing or insufficient. Falling back to public storage URL:', signedErr.message);
+                // Fallback public read URL (works if public read rules are active)
+                downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(destinationPath)}?alt=media`;
+            }
+            storagePath = destinationPath;
+        } catch (storageErr) {
+            console.warn('⚠️ Cloud Storage upload failed, falling back to local file storage:', storageErr.message);
+            
+            // Save file locally as fallback
+            const localDir = path.resolve(process.cwd(), 'static', 'uploads');
+            if (!fs.existsSync(localDir)) {
+                fs.mkdirSync(localDir, { recursive: true });
+            }
+            const uniqueFileName = `${Date.now()}_${file.name}`;
+            const localPath = path.join(localDir, uniqueFileName);
+            fs.writeFileSync(localPath, buffer);
+            
+            downloadUrl = `/uploads/${uniqueFileName}`;
+            storagePath = `local-uploads/${uniqueFileName}`;
+            console.log(`✅ Saved file locally to: ${localPath}`);
         }
 
         const projectId = Date.now();
@@ -93,7 +116,7 @@ export async function POST({ request, locals }) {
             fileName: file.name,
             fileSize: file.size,
             firebaseStorageUrl: downloadUrl,
-            storagePath: destinationPath,
+            storagePath: storagePath,
             createdAt: new Date().toISOString(),
 
             // Legacy compatibility fields

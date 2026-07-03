@@ -78,6 +78,21 @@
       "bio": "No bio yet.",
       "joinedDate": "Jul 2026",
       "bookmarkedProjectIds": []
+    },
+    "0987654321": {
+      "userId": "0987654321",
+      "username": "123 123",
+      "email": "123@sonatech.ac.in",
+      "passwordHash": "$2b$10$R1HlJgffT6VDnDJEPUfv.uMv0OInSfcj4xSstgJz1S7/6kYj549FS",
+      "createdAt": "2026-07-02T08:45:09.883Z",
+      "name": "123 123",
+      "mobile": "1234567890",
+      "registerNumber": "0987654321",
+      "department": "MCA",
+      "academicYear": "4 Year",
+      "bio": "No bio yet.",
+      "joinedDate": "Jul 2026",
+      "bookmarkedProjectIds": []
     }
   },
   "projects": {
@@ -224,6 +239,13 @@
       "time": "Just now",
       "timestamp": 1782933382523,
       "id": "ovew1mz1y2h"
+    },
+    "wxknxvqam8": {
+      "type": "join",
+      "text": "<strong>123 123</strong> joined CampusRepo",
+      "time": "Just now",
+      "timestamp": 1782981910014,
+      "id": "wxknxvqam8"
     }
   }
 }
