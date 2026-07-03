@@ -1,7 +1,25 @@
 <script>
     import { onMount } from 'svelte';
-    import { getCurrentSession, uploadProject } from '$lib/storage.js';
+    import { getCurrentSession } from '$lib/storage.js';
     import { toastState } from '$lib/toasts.svelte.js';
+
+    // Firebase Client-side imports
+    import { initializeApp } from 'firebase/app';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+    // Your web app client-side Firebase config options
+    const firebaseConfig = {
+        apiKey: import.meta.env.VITE_PUBLIC_FIREBASE_API_KEY,
+        authDomain: import.meta.env.VITE_PUBLIC_FIREBASE_AUTH_DOMAIN,
+        projectId: import.meta.env.VITE_PUBLIC_FIREBASE_PROJECT_ID,
+        storageBucket: import.meta.env.VITE_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: import.meta.env.VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+        appId: import.meta.env.VITE_PUBLIC_FIREBASE_APP_ID
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
 
     let session = $state(null);
     let mounted = $state(false);
@@ -74,14 +92,46 @@
         isUploading = true;
 
         try {
-            const projectData = {
-                title: formData.title,
-                abstract: formData.abstract,
-                domain: formData.domain,
-                visibility: formData.visibility
-            };
+            const file = fileToUpload; // Rename for clarity
 
-            const result = await uploadProject(projectData, fileToUpload, session.user);
+            // Determine storage paths exactly like your backend used to
+            let folder = 'zips';
+            let fileType = 'zip';
+            if (file.name.toLowerCase().endsWith('.pdf')) {
+                folder = 'pdfs';
+                fileType = 'pdf';
+            } else if (file.name.toLowerCase().endsWith('.ppt') || file.name.toLowerCase().endsWith('.pptx')) {
+                folder = 'ppts';
+                fileType = 'ppt';
+            } else if (file.name.toLowerCase().endsWith('.md') || file.name.toLowerCase().endsWith('.txt')) {
+                folder = 'readmes';
+                fileType = 'text';
+            }
+
+
+            const destinationPath = `campus-repo/${folder}/${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, destinationPath);
+
+            // 1. Upload straight to Firebase Storage from the browser client
+            const snapshot = await uploadBytes(storageRef, file);
+            const fileUrl = await getDownloadURL(snapshot.ref);
+
+            // 2. Post the payload text data along with the URL to Vercel
+            const response = await fetch('/api/projects/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...formData, // Pass all form data
+                    fileUrl,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    fileType,
+                    destinationPath
+                })
+            });
+
+            const result = await response.json();
+
 
             isUploading = false;
             
