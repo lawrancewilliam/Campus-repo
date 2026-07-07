@@ -95,7 +95,7 @@
         isUploading = true;
 
         try {
-<<<<<<< Updated upstream
+
             const file = fileToUpload; // Rename for clarity
 
             // Determine storage paths exactly like your backend used to
@@ -135,14 +135,14 @@
             });
 
             const result = await response.json();
-=======
+
             const projectData = {
                 title: formData.title,
                 abstract: formData.abstract,
                 domain: finalDomain,
                 visibility: formData.visibility
             };
->>>>>>> Stashed changes
+
 
 
             isUploading = false;
