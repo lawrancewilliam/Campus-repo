@@ -6,15 +6,23 @@
     // Firebase Client-side imports
     import { initializeApp } from 'firebase/app';
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+    import {
+        PUBLIC_FIREBASE_API_KEY,
+        PUBLIC_FIREBASE_AUTH_DOMAIN,
+        PUBLIC_FIREBASE_PROJECT_ID,
+        PUBLIC_FIREBASE_STORAGE_BUCKET,
+        PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+        PUBLIC_FIREBASE_APP_ID
+    } from '$env/static/public';
 
     // Your web app client-side Firebase config options
     const firebaseConfig = {
-        apiKey: import.meta.env.VITE_PUBLIC_FIREBASE_API_KEY,
-        authDomain: import.meta.env.VITE_PUBLIC_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_PUBLIC_FIREBASE_PROJECT_ID,
-        storageBucket: import.meta.env.VITE_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-        appId: import.meta.env.VITE_PUBLIC_FIREBASE_APP_ID
+        apiKey: PUBLIC_FIREBASE_API_KEY,
+        authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
+        projectId: PUBLIC_FIREBASE_PROJECT_ID,
+        storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+        appId: PUBLIC_FIREBASE_APP_ID
     };
 
     // Initialize Firebase
@@ -95,7 +103,6 @@
         isUploading = true;
 
         try {
-<<<<<<< Updated upstream
             const file = fileToUpload; // Rename for clarity
 
             // Determine storage paths exactly like your backend used to
@@ -126,6 +133,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData, // Pass all form data
+                    category: finalDomain,
                     fileUrl,
                     fileName: file.name,
                     fileSize: file.size,
@@ -135,14 +143,6 @@
             });
 
             const result = await response.json();
-=======
-            const projectData = {
-                title: formData.title,
-                abstract: formData.abstract,
-                domain: finalDomain,
-                visibility: formData.visibility
-            };
->>>>>>> Stashed changes
 
 
             isUploading = false;
@@ -359,7 +359,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Visibility</label>
+                        <span class="form-label">Visibility</span>
                         <div class="visibility-options">
                             <label class="radio-option">
                                 <input type="radio" bind:group={formData.visibility} value="Public" />
@@ -466,7 +466,7 @@
     }
 
     .form-group { margin-bottom: 1.25rem; }
-    .form-group label {
+    .form-group label, .form-group .form-label {
         display: block;
         margin-bottom: 0.5rem;
         font-size: 0.9rem;
@@ -475,7 +475,7 @@
     }
     .required { color: #ef4444; }
 
-    .dark-input, .dark-input select, .dark-input textarea {
+    .dark-input {
         width: 100%;
         background: var(--bg-input);
         border: 1px solid var(--border);
@@ -486,7 +486,7 @@
         transition: 0.2s;
         box-sizing: border-box;
     }
-    .dark-input:focus, .dark-input select:focus, .dark-input textarea:focus {
+    .dark-input:focus {
         outline: none;
         border-color: var(--primary);
     }

@@ -1,7 +1,33 @@
 <script>
     import { onMount } from 'svelte';
-    import { getCurrentSession, getStudents, uploadProject } from '$lib/storage.js';
+    import { getCurrentSession, getStudents } from '$lib/storage.js';
     import { toastState } from '$lib/toasts.svelte.js';
+
+    // Firebase Client-side imports
+    import { initializeApp } from 'firebase/app';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+    import { 
+        PUBLIC_FIREBASE_API_KEY, 
+        PUBLIC_FIREBASE_AUTH_DOMAIN, 
+        PUBLIC_FIREBASE_PROJECT_ID, 
+        PUBLIC_FIREBASE_STORAGE_BUCKET, 
+        PUBLIC_FIREBASE_MESSAGING_SENDER_ID, 
+        PUBLIC_FIREBASE_APP_ID 
+    } from '$env/static/public';
+
+    // Your web app client-side Firebase config options
+    const firebaseConfig = {
+        apiKey: PUBLIC_FIREBASE_API_KEY,
+        authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
+        projectId: PUBLIC_FIREBASE_PROJECT_ID,
+        storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+        appId: PUBLIC_FIREBASE_APP_ID
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
 
     let session = $state(null);
     let students = $state([]);
@@ -80,7 +106,7 @@
         isUploading = true;
 
         try {
-            let authorUser = { name: 'Admin', registerNumber: '12345', department: 'Admin' };
+            let authorUser = { name: 'Admin', registerNumber: 'admin', department: 'Admin' };
             
             if (formData.selectedAuthor !== 'admin') {
                 const found = students.find(s => s.registerNumber === formData.selectedAuthor);
@@ -89,14 +115,49 @@
                 }
             }
 
-            const projectData = {
-                title: formData.title,
-                abstract: formData.abstract,
-                domain: finalDomain,
-                visibility: formData.visibility
-            };
+            const file = fileToUpload; // Rename for clarity
 
-            const result = await uploadProject(projectData, fileToUpload, authorUser);
+            // Determine storage paths exactly like student upload
+            let folder = 'zips';
+            let fileType = 'zip';
+            if (file.name.toLowerCase().endsWith('.pdf')) {
+                folder = 'pdfs';
+                fileType = 'pdf';
+            } else if (file.name.toLowerCase().endsWith('.ppt') || file.name.toLowerCase().endsWith('.pptx')) {
+                folder = 'ppts';
+                fileType = 'ppt';
+            } else if (file.name.toLowerCase().endsWith('.md') || file.name.toLowerCase().endsWith('.txt')) {
+                folder = 'readmes';
+                fileType = 'text';
+            }
+
+            const destinationPath = `campus-repo/${folder}/${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, destinationPath);
+
+            // 1. Upload straight to Firebase Storage from the browser client
+            const snapshot = await uploadBytes(storageRef, file);
+            const fileUrl = await getDownloadURL(snapshot.ref);
+
+            // 2. Post the payload text data along with the URL to Vercel
+            const response = await fetch('/api/projects/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...formData, // Pass all form data
+                    category: finalDomain,
+                    fileUrl,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    fileType,
+                    destinationPath,
+                    // If we're admin, pass overridden author details
+                    authorName: authorUser.name,
+                    authorRegNo: authorUser.registerNumber,
+                    dept: authorUser.department
+                })
+            });
+
+            const result = await response.json();
             isUploading = false;
             
             if (result.success) {
@@ -321,7 +382,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Visibility</label>
+                        <span class="form-label">Visibility</span>
                         <div class="visibility-options">
                             <label class="radio-option">
                                 <input type="radio" bind:group={formData.visibility} value="Public" />
@@ -424,7 +485,7 @@
     }
 
     .form-group { margin-bottom: 1.25rem; }
-    .form-group label {
+    .form-group label, .form-group .form-label {
         display: block;
         margin-bottom: 0.5rem;
         font-size: 0.9rem;
@@ -433,7 +494,7 @@
     }
     .required { color: #ef4444; }
 
-    .dark-input, .dark-input select, .dark-input textarea {
+    .dark-input {
         width: 100%;
         background: var(--bg-input);
         border: 1px solid var(--border);
@@ -444,7 +505,7 @@
         transition: 0.2s;
         box-sizing: border-box;
     }
-    .dark-input:focus, .dark-input select:focus, .dark-input textarea:focus {
+    .dark-input:focus {
         outline: none;
         border-color: var(--primary);
     }

@@ -14,14 +14,28 @@ export async function POST({ request, locals }) {
             return json({ success: false, message: 'Missing required project details or uploaded file link.' }, { status: 400 });
         }
 
+        let uploadedBy = locals.user.username || locals.user.name || 'Student';
+        let userId = locals.user.userId || locals.user.registerNumber;
+        let authorName = uploadedBy;
+        let authorRegNo = userId;
+        let dept = locals.user.department || 'CSE';
+
+        if (locals.user.role === 'admin' && body.authorRegNo) {
+            authorName = body.authorName || authorName;
+            authorRegNo = body.authorRegNo;
+            dept = body.dept || dept;
+            uploadedBy = authorName;
+            userId = authorRegNo;
+        }
+
         const projectId = Date.now();
 
         const projectData = {
             projectId: String(projectId),
             projectName: title,
             description: abstract,
-            uploadedBy: locals.user.username || locals.user.name || 'Student',
-            userId: locals.user.userId || locals.user.registerNumber,
+            uploadedBy: uploadedBy,
+            userId: userId,
             fileType: fileType,
             fileName: fileName,
             fileSize: fileSize,
@@ -35,9 +49,9 @@ export async function POST({ request, locals }) {
             abstract: abstract,
             category: category || 'General',
             visibility: visibility || 'Public',
-            authorName: locals.user.username || locals.user.name || 'Student',
-            authorRegNo: locals.user.userId || locals.user.registerNumber,
-            dept: locals.user.department || 'CSE',
+            authorName: authorName,
+            authorRegNo: authorRegNo,
+            dept: dept,
             views: 0,
             stars: 0,
             downloadsCount: 0,
