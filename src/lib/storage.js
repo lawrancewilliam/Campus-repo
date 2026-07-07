@@ -14,12 +14,12 @@ function setLocal(key, val) {
 }
 
 export function getCurrentSession() {
-    return getLocal('current_session', null);
+    return getLocal('session', null);
 }
 
 export async function logout() {
     if (isClient) {
-        localStorage.removeItem('current_session');
+        localStorage.removeItem('session');
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
         } catch (e) {
@@ -32,7 +32,7 @@ export async function logout() {
 
 export async function registerStudent(student) {
     try {
-        const res = await fetch('/api/auth/register', {
+        const res = await fetch('/api/auth/register', { // SvelteKit endpoint is already correct
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(student)
@@ -49,16 +49,16 @@ export async function registerStudent(student) {
     }
 }
 
-export async function loginUser(username, password) {
+export async function loginUser(username, password, role) {
     try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('/api/auth/login', { // SvelteKit endpoint is already correct
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, role })
         });
         const result = await res.json();
         if (result.success) {
-            setLocal('current_session', result.session);
+            setLocal('session', result.session);
         }
         return result;
     } catch (e) {
@@ -111,7 +111,7 @@ export async function updateStudentProfile(regNo, updatedData) {
             const session = getCurrentSession();
             if (session && session.role === 'student' && session.user.registerNumber === regNo) {
                 session.user = { ...session.user, ...updatedData };
-                setLocal('current_session', session);
+                setLocal('session', session);
             }
         }
         return result;
@@ -214,7 +214,7 @@ export async function toggleBookmark(projectId, regNo) {
             const session = getCurrentSession();
             if (session && session.role === 'student' && session.user.registerNumber === regNo) {
                 session.user = result.student;
-                setLocal('current_session', session);
+                setLocal('session', session);
             }
         }
         return result;

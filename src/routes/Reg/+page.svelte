@@ -24,6 +24,7 @@
     let showConfirmPassword = $state(false);
     let isLoading = $state(false);
     let toasts = $state([]);
+    let customDept = $state('');
 
     // --- DERIVED VALIDATION STATES ---
     let isEmailValid = $derived(emailRegex.test(formData.email));
@@ -88,6 +89,12 @@
             isValid = false;
         }
 
+        const finalDept = formData.department === 'Others' ? customDept : formData.department;
+        if (formData.department === 'Others' && !customDept.trim()) {
+            showToast("Please specify your department", "error");
+            return;
+        }
+
         if (!isValid) return;
 
         isLoading = true;
@@ -99,7 +106,7 @@
                 mobile: formData.mobile,
                 registerNumber: formData.regno,
                 password: formData.password,
-                department: formData.department,
+                department: finalDept,
                 academicYear: formData.year ? `${formData.year} Year` : "3rd Year"
             });
 
@@ -494,11 +501,19 @@
                             <select id="department" class="form-select" bind:value={formData.department} required>
                                 <option value="" disabled selected>Select Dept</option>
                                 <option value="CSE">Computer Science (CSE)</option>
-                                <option value="ECE">Electronics (ECE)</option>
-                                <option value="EEE">Electrical (EEE)</option>
+                                <option value="IT">Information Technology (IT)</option>
+                                <option value="ECE">Electronics & Communication (ECE)</option>
+                                <option value="EEE">Electrical & Electronics (EEE)</option>
                                 <option value="MECH">Mechanical (MECH)</option>
+                                <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                                <option value="FT">Fashion Technology (FT)</option>
+                                <option value="AIDS">Artificial Intelligence & Data Science (AI & DS)</option>
+                                <option value="BME">Biomedical Engineering (BME)</option>
+                                <option value="CSD">Computer Science & Design (CSD)</option>
+                                <option value="MCT">Mechatronics Engineering (MCT)</option>
                                 <option value="MCA">MCA</option>
                                 <option value="MBA">MBA</option>
+                                <option value="Others">Others</option>
                             </select>
                         </div>
                     </div>
@@ -518,6 +533,16 @@
                         </div>
                     </div>
 
+                    {#if formData.department === 'Others'}
+                        <div class="form-group full-width animate-fade-in" style="margin-bottom: 0.5rem;">
+                            <label class="form-label" for="custom-dept">Specify Department <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-building-columns input-icon"></i>
+                                <input type="text" id="custom-dept" class="form-input" bind:value={customDept} placeholder="Enter your department name" required>
+                            </div>
+                        </div>
+                    {/if}
+
                     <!-- Password -->
                     <div class="form-group full-width">
                         <label class="form-label" for="password">Password (Min 6 chars: 1 Upper, 1 Lower, 1 Number, 1 Special)</label>
@@ -533,7 +558,7 @@
                                 required
                             >
                             <i class="fa-solid fa-circle-check validation-tick" class:visible={isPasswordValid}></i>
-                            <button type="button" class="password-toggle" onclick={() => togglePassword('password')}>
+                            <button type="button" class="password-toggle" onclick={() => togglePassword('password')} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                                 <i class="fa-solid {showPassword ? 'fa-eye-slash' : 'fa-eye'}"></i>
                             </button>
                         </div>
@@ -558,7 +583,7 @@
                                 <i class="fa-solid fa-circle-check validation-tick visible"></i>
                             {/if}
                             
-                            <button type="button" class="password-toggle" onclick={() => togglePassword('confirm')}>
+                            <button type="button" class="password-toggle" onclick={() => togglePassword('confirm')} aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}>
                                 <i class="fa-solid {showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}"></i>
                             </button>
                         </div>

@@ -41,6 +41,8 @@
         visibility: 'Public' // Default to Public
     });
 
+    let customDomain = $state('');
+
     let files = $state({
         sourceCode: null,
         report: null,
@@ -51,7 +53,7 @@
     const domains = [
         "Web Development", "Mobile Applications", "Artificial Intelligence", 
         "Machine Learning", "Cloud Computing", "Data Science", 
-        "Internet of Things", "Cyber Security"
+        "Internet of Things", "Cyber Security", "Others"
     ];
 
     onMount(() => {
@@ -77,7 +79,8 @@
     }
 
     async function handleSubmit() {
-        if (!formData.title || !formData.abstract || !formData.domain) {
+        const finalDomain = formData.domain === 'Others' ? customDomain : formData.domain;
+        if (!formData.title || !formData.abstract || !finalDomain) {
             alert("Please fill in the required fields (Title, Abstract, Domain).");
             return;
         }
@@ -92,6 +95,7 @@
         isUploading = true;
 
         try {
+<<<<<<< Updated upstream
             const file = fileToUpload; // Rename for clarity
 
             // Determine storage paths exactly like your backend used to
@@ -131,6 +135,14 @@
             });
 
             const result = await response.json();
+=======
+            const projectData = {
+                title: formData.title,
+                abstract: formData.abstract,
+                domain: finalDomain,
+                visibility: formData.visibility
+            };
+>>>>>>> Stashed changes
 
 
             isUploading = false;
@@ -219,6 +231,13 @@
                             </select>
                         </div>
                     </div>
+
+                    {#if formData.domain === 'Others'}
+                        <div class="form-group animate-fade-in" style="margin-bottom: 1.5rem;">
+                            <label for="custom-domain">Specify Other Domain <span class="required">*</span></label>
+                            <input id="custom-domain" type="text" class="dark-input" bind:value={customDomain} placeholder="e.g. Blockchain, Bioinformatics, Cybersecurity" required />
+                        </div>
+                    {/if}
 
                     <div class="form-group">
                         <label for="project-year">Academic Year</label>
