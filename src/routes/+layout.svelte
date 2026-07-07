@@ -18,7 +18,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </svelte:head>
 
-{@render children()}
+<main>
+    {@render children()}
+</main>
 
 <!-- Global Toast Container -->
 <div id="global-toast-container">
@@ -40,17 +42,33 @@
 </div>
 
 <style>
+    :global(body) {
+		margin: 0;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+			'Open Sans', 'Helvetica Neue', sans-serif;
+	}
+
+	main { min-height: 100vh; }
     #global-toast-container {
         position: fixed;
-        bottom: 24px;
-        right: 24px;
+        bottom: 0;
+        left: 0;
+        right: 0;
         z-index: 9999;
         display: flex;
         flex-direction: column;
         gap: 12px;
-        max-width: 400px;
-        width: calc(100% - 48px);
+        padding: 1rem;
         pointer-events: none;
+    }
+
+    /* On larger screens, move toasts to the bottom-right corner */
+    @media (min-width: 640px) {
+        #global-toast-container {
+            bottom: 24px;
+            left: auto;
+            max-width: 420px;
+        }
     }
 
     .global-toast {
