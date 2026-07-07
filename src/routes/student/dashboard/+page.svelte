@@ -13,10 +13,13 @@
     let isEditModalOpen = $state(false);
     let projectToEdit = $state(null);
 
+    let selectedDomain = $state('');
+    let customDomain = $state('');
+
     const domains = [
         "Web Development", "Mobile Applications", "Artificial Intelligence", 
         "Machine Learning", "Cloud Computing", "Data Science", 
-        "Internet of Things", "Cyber Security"
+        "Internet of Things", "Cyber Security", "Others"
     ];
 
     // Stats
@@ -68,6 +71,15 @@
 
     function openEditModal(project) {
         projectToEdit = { ...project };
+        const categoryVal = project.category || '';
+        // If the category is one of the standard domains (except 'Others')
+        if (domains.filter(d => d !== 'Others').includes(categoryVal)) {
+            selectedDomain = categoryVal;
+            customDomain = '';
+        } else {
+            selectedDomain = 'Others';
+            customDomain = categoryVal;
+        }
         isEditModalOpen = true;
     }
 
@@ -82,10 +94,12 @@
             return;
         }
 
+        const finalDomain = selectedDomain === 'Others' ? customDomain : selectedDomain;
+
         const res = await updateProject(projectToEdit.id, {
             title: projectToEdit.title,
             abstract: projectToEdit.abstract,
-            category: projectToEdit.category,
+            category: finalDomain,
             visibility: projectToEdit.visibility
         });
 
@@ -275,12 +289,18 @@
                     </div>
                     <div class="form-group">
                         <label for="modal-edit-category">Category / Domain</label>
-                        <select id="modal-edit-category" class="dark-input-field" bind:value={projectToEdit.category}>
+                        <select id="modal-edit-category" class="dark-input-field" bind:value={selectedDomain}>
                             {#each domains as domain}
                                 <option value={domain}>{domain}</option>
                             {/each}
                         </select>
                     </div>
+                    {#if selectedDomain === 'Others'}
+                        <div class="form-group animate-fade-in" style="margin-top: 1rem;">
+                            <label for="modal-edit-custom-category">Specify Other Domain</label>
+                            <input id="modal-edit-custom-category" type="text" class="dark-input-field" bind:value={customDomain} placeholder="e.g. Blockchain, Cybersecurity, Bioinformatics" />
+                        </div>
+                    {/if}
                     <div class="form-group">
                         <label>Visibility</label>
                         <div class="radio-group-horizontal">

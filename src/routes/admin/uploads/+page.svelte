@@ -16,6 +16,15 @@
     let isEditModalOpen = $state(false);
     let projectToEdit = $state(null);
 
+    let selectedDomain = $state('');
+    let customDomain = $state('');
+
+    const domains = [
+        "Web Development", "Mobile Applications", "Artificial Intelligence", 
+        "Machine Learning", "Cloud Computing", "Data Science", 
+        "Internet of Things", "Cyber Security", "Others"
+    ];
+
     // Get unique categories for filter
     let categories = $derived(['All', ...new Set(projects.map(p => p.category))]);
 
@@ -72,6 +81,15 @@
 
     function openEditModal(project) {
         projectToEdit = { ...project };
+        const categoryVal = project.category || '';
+        // If the category is one of the standard domains (except 'Others')
+        if (domains.filter(d => d !== 'Others').includes(categoryVal)) {
+            selectedDomain = categoryVal;
+            customDomain = '';
+        } else {
+            selectedDomain = 'Others';
+            customDomain = categoryVal;
+        }
         isEditModalOpen = true;
     }
 
@@ -86,10 +104,12 @@
             return;
         }
         
+        const finalDomain = selectedDomain === 'Others' ? customDomain : selectedDomain;
+
         const res = await updateProject(projectToEdit.id, {
             title: projectToEdit.title,
             abstract: projectToEdit.abstract,
-            category: projectToEdit.category,
+            category: finalDomain,
             visibility: projectToEdit.visibility
         });
 
@@ -245,7 +265,7 @@
     <!-- EDIT PROJECT MODAL -->
     {#if isEditModalOpen && projectToEdit}
         <div class="modal-backdrop" onclick={closeEditModal} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && closeEditModal()}>
-            <div class="modal-card" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <div class="modal-card" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
                 <header class="modal-header">
                     <h3>Edit Project Details</h3>
                     <button class="close-btn" onclick={closeEditModal} aria-label="Close modal">&times;</button>
@@ -261,14 +281,20 @@
                     </div>
                     <div class="form-group">
                         <label for="edit-category">Category / Domain</label>
-                        <select id="edit-category" class="dark-input" bind:value={projectToEdit.category}>
+                        <select id="edit-category" class="dark-input" bind:value={selectedDomain}>
                             {#each domains as domain}
                                 <option value={domain}>{domain}</option>
                             {/each}
                         </select>
                     </div>
+                    {#if selectedDomain === 'Others'}
+                        <div class="form-group animate-fade-in" style="margin-top: 1rem;">
+                            <label for="edit-custom-category">Specify Other Domain</label>
+                            <input id="edit-custom-category" type="text" class="dark-input" bind:value={customDomain} placeholder="e.g. Blockchain, Cybersecurity, Bioinformatics" />
+                        </div>
+                    {/if}
                     <div class="form-group">
-                        <label>Visibility</label>
+                        <span class="form-label">Visibility</span>
                         <div class="radio-group-horizontal">
                             <label class="radio-label">
                                 <input type="radio" bind:group={projectToEdit.visibility} value="Public" /> Public
@@ -520,7 +546,7 @@
         overflow-y: auto;
     }
     .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    .form-group label, .form-group .form-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
     .radio-group-horizontal { display: flex; gap: 1.5rem; align-items: center; margin-top: 4px; }
     .radio-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-main); cursor: pointer; }
