@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
+const JWT_SECRET = env.JWT_SECRET || 'fallback-super-secret-key-for-local-dev';
 const SALT_ROUNDS = 10;
 
 /**

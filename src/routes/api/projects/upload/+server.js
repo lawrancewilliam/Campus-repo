@@ -8,7 +8,27 @@ export async function POST({ request, locals }) {
         }
 
         const body = await request.json();
-        const { title, abstract, category, visibility, fileUrl, fileName, fileSize, fileType, destinationPath } = body;
+        const { 
+            title, 
+            abstract, 
+            category, 
+            domain,
+            visibility, 
+            fileUrl, 
+            fileName, 
+            fileSize, 
+            fileType, 
+            destinationPath,
+            semester,
+            academicYear,
+            teamLeader,
+            teamMembers,
+            frontendTech,
+            backendTech,
+            database,
+            toolsUsed,
+            tags
+        } = body;
 
         if (!fileUrl || !title || !abstract) {
             return json({ success: false, message: 'Missing required project details or uploaded file link.' }, { status: 400 });
@@ -29,11 +49,23 @@ export async function POST({ request, locals }) {
             storagePath: destinationPath,
             createdAt: new Date().toISOString(),
 
+            // Form metadata fields
+            category: category || domain || 'General',
+            domain: domain || category || 'General',
+            semester: semester || '',
+            academicYear: academicYear || '',
+            teamLeader: teamLeader || '',
+            teamMembers: teamMembers || '',
+            frontendTech: frontendTech || '',
+            backendTech: backendTech || '',
+            database: database || '',
+            toolsUsed: toolsUsed || '',
+            tags: tags || '',
+
             // Legacy compatibility fields
             id: projectId,
             title: title,
             abstract: abstract,
-            category: category || 'General',
             visibility: visibility || 'Public',
             authorName: locals.user.username || locals.user.name || 'Student',
             authorRegNo: locals.user.userId || locals.user.registerNumber,

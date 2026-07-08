@@ -87,15 +87,24 @@
 
         try {
             // Guard against cross logins
-            if (currentRole === 'student' && identifier === '12345' && password === 'William26') {
-                showToast("This account belongs to an Administrator. Please switch to Admin Login Mode.", "error");
-                isLoading = false;
-                return;
+            if (currentRole === 'student') {
+                if (identifier === 'admin') {
+                    showToast("This account belongs to an Administrator. Please switch to Admin Login Mode.", "error");
+                    isLoading = false;
+                    return;
+                }
+                const studentsList = await getStudents();
+                const adminUser = studentsList.find(s => (s.registerNumber === identifier || s.email === identifier) && s.role === 'admin');
+                if (adminUser) {
+                    showToast("This account belongs to an Administrator. Please switch to Admin Login Mode.", "error");
+                    isLoading = false;
+                    return;
+                }
             }
 
             if (currentRole === 'admin') {
                 const studentsList = await getStudents();
-                const student = studentsList.find(s => s.registerNumber === identifier || s.email === identifier);
+                const student = studentsList.find(s => (s.registerNumber === identifier || s.email === identifier) && s.role !== 'admin');
                 if (student) {
                     showToast("This account belongs to a Student. Please switch to Student Login Mode.", "error");
                     isLoading = false;

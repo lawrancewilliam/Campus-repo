@@ -1,25 +1,7 @@
 <script>
     import { onMount } from 'svelte';
-    import { getCurrentSession } from '$lib/storage.js';
+    import { getCurrentSession, uploadProject } from '$lib/storage.js';
     import { toastState } from '$lib/toasts.svelte.js';
-
-    // Firebase Client-side imports
-    import { initializeApp } from 'firebase/app';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-
-    // Your web app client-side Firebase config options
-    const firebaseConfig = {
-        apiKey: import.meta.env.VITE_PUBLIC_FIREBASE_API_KEY,
-        authDomain: import.meta.env.VITE_PUBLIC_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_PUBLIC_FIREBASE_PROJECT_ID,
-        storageBucket: import.meta.env.VITE_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-        appId: import.meta.env.VITE_PUBLIC_FIREBASE_APP_ID
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app);
 
     let session = $state(null);
     let mounted = $state(false);
@@ -51,7 +33,7 @@
     const domains = [
         "Web Development", "Mobile Applications", "Artificial Intelligence", 
         "Machine Learning", "Cloud Computing", "Data Science", 
-        "Internet of Things", "Cyber Security"
+        "Internet of Things", "Cyber Security", "Other"
     ];
 
     onMount(() => {
@@ -92,46 +74,12 @@
         isUploading = true;
 
         try {
-            const file = fileToUpload; // Rename for clarity
-
-            // Determine storage paths exactly like your backend used to
-            let folder = 'zips';
-            let fileType = 'zip';
-            if (file.name.toLowerCase().endsWith('.pdf')) {
-                folder = 'pdfs';
-                fileType = 'pdf';
-            } else if (file.name.toLowerCase().endsWith('.ppt') || file.name.toLowerCase().endsWith('.pptx')) {
-                folder = 'ppts';
-                fileType = 'ppt';
-            } else if (file.name.toLowerCase().endsWith('.md') || file.name.toLowerCase().endsWith('.txt')) {
-                folder = 'readmes';
-                fileType = 'text';
-            }
-
-
-            const destinationPath = `campus-repo/${folder}/${Date.now()}_${file.name}`;
-            const storageRef = ref(storage, destinationPath);
-
-            // 1. Upload straight to Firebase Storage from the browser client
-            const snapshot = await uploadBytes(storageRef, file);
-            const fileUrl = await getDownloadURL(snapshot.ref);
-
-            // 2. Post the payload text data along with the URL to Vercel
-            const response = await fetch('/api/projects/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData, // Pass all form data
-                    fileUrl,
-                    fileName: file.name,
-                    fileSize: file.size,
-                    fileType,
-                    destinationPath
-                })
-            });
-
-            const result = await response.json();
-
+            const result = await uploadProject({
+                ...formData,
+                title: formData.title,
+                abstract: formData.abstract,
+                category: formData.domain,
+            }, fileToUpload, session.user);
 
             isUploading = false;
             
@@ -275,7 +223,7 @@
                     <div class="file-grid">
                         <!-- Source Code -->
                         <div class="file-upload-box" onclick={() => triggerFileInput('file-source')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && triggerFileInput('file-source')}>
-                            <input type="file" id="file-source" accept=".zip,.rar,.7z" hidden onchange={(e) => handleFileSelect(e, 'sourceCode')} />
+                            <input type="file" id="file-source" accept=".zip,.rar,.7z" style="position: absolute; width: 1px; height: 1px; opacity: 0.001; pointer-events: none;" onchange={(e) => handleFileSelect(e, 'sourceCode')} />
                             <i class="fa-solid fa-file-zipper" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>Source Code (ZIP)</h4>
@@ -286,7 +234,7 @@
 
                         <!-- Report -->
                         <div class="file-upload-box" onclick={() => triggerFileInput('file-report')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && triggerFileInput('file-report')}>
-                            <input type="file" id="file-report" accept=".pdf" hidden onchange={(e) => handleFileSelect(e, 'report')} />
+                            <input type="file" id="file-report" accept=".pdf" style="position: absolute; width: 1px; height: 1px; opacity: 0.001; pointer-events: none;" onchange={(e) => handleFileSelect(e, 'report')} />
                             <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>Final Report (PDF)</h4>
@@ -297,7 +245,7 @@
 
                         <!-- Presentation -->
                         <div class="file-upload-box" onclick={() => triggerFileInput('file-ppt')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && triggerFileInput('file-ppt')}>
-                            <input type="file" id="file-ppt" accept=".ppt,.pptx" hidden onchange={(e) => handleFileSelect(e, 'presentation')} />
+                            <input type="file" id="file-ppt" accept=".ppt,.pptx" style="position: absolute; width: 1px; height: 1px; opacity: 0.001; pointer-events: none;" onchange={(e) => handleFileSelect(e, 'presentation')} />
                             <i class="fa-solid fa-file-powerpoint" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>Presentation (PPT)</h4>
@@ -308,7 +256,7 @@
 
                         <!-- README -->
                         <div class="file-upload-box" onclick={() => triggerFileInput('file-readme')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && triggerFileInput('file-readme')}>
-                            <input type="file" id="file-readme" accept=".md,.txt" hidden onchange={(e) => handleFileSelect(e, 'readme')} />
+                            <input type="file" id="file-readme" accept=".md,.txt" style="position: absolute; width: 1px; height: 1px; opacity: 0.001; pointer-events: none;" onchange={(e) => handleFileSelect(e, 'readme')} />
                             <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
                             <div class="file-info">
                                 <h4>README File</h4>

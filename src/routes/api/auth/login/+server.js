@@ -15,6 +15,29 @@ export async function POST({ request, cookies }) {
         let studentDocRef = null;
         const studentsRef = adminDb.collection('students');
         
+        if (username === 'admin') {
+            const adminDoc = await studentsRef.doc('admin').get();
+            if (!adminDoc.exists) {
+                const adminPasswordHash = await hashPassword('Admin@1234');
+                const mockAdmin = {
+                    userId: "admin",
+                    username: "admin",
+                    name: "Admin",
+                    email: "admin@sonatech.ac.in",
+                    passwordHash: adminPasswordHash,
+                    registerNumber: "admin",
+                    role: "admin",
+                    department: "Admin",
+                    academicYear: "N/A",
+                    bio: "Built-in Administrator account.",
+                    joinedDate: "Jul 2026",
+                    bookmarkedProjectIds: []
+                };
+                await studentsRef.doc('admin').set(mockAdmin);
+                console.log('✅ Seeded built-in admin account during login.');
+            }
+        }
+
         // Attempt search by register number (document ID)
         const docSnap = await studentsRef.doc(username).get();
         

@@ -35,7 +35,7 @@
     const domains = [
         "Web Development", "Mobile Applications", "Artificial Intelligence", 
         "Machine Learning", "Cloud Computing", "Data Science", 
-        "Internet of Things", "Cyber Security"
+        "Internet of Things", "Cyber Security", "Other"
     ];
 
     onMount(async () => {

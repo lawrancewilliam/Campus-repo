@@ -93,6 +93,50 @@
       "bio": "No bio yet.",
       "joinedDate": "Jul 2026",
       "bookmarkedProjectIds": []
+    },
+    "admin": {
+      "userId": "admin",
+      "username": "admin",
+      "name": "Admin",
+      "email": "admin@sonatech.ac.in",
+      "passwordHash": "$2b$10$Uc.sUreP121zjdeR9RwNduDkYd24PXFrPSgKcMHjWEBqNpnSGyfsO",
+      "registerNumber": "admin",
+      "role": "admin",
+      "department": "Admin",
+      "academicYear": "N/A",
+      "bio": "Built-in Administrator account.",
+      "joinedDate": "Jul 2026",
+      "bookmarkedProjectIds": []
+    },
+    "21MCA999": {
+      "userId": "21MCA999",
+      "username": "Test Student",
+      "name": "Test Student",
+      "email": "teststudent@sonatech.ac.in",
+      "mobile": "9876543210",
+      "registerNumber": "21MCA999",
+      "department": "CSE",
+      "academicYear": "1 Year",
+      "bio": "No bio yet.",
+      "joinedDate": "Jul 2026",
+      "bookmarkedProjectIds": [],
+      "createdAt": "2026-07-07T14:45:58.302Z",
+      "passwordHash": "$2b$10$itr986P1HShV1ZQZbjSot.VyDQYlhp6OmEh2H0qFhZn2/G58hV3EK"
+    },
+    "21MCA888": {
+      "userId": "21MCA888",
+      "username": "Test Student Two",
+      "name": "Test Student Two",
+      "email": "teststudent2@sonatech.ac.in",
+      "mobile": "9876543210",
+      "registerNumber": "21MCA888",
+      "department": "IT",
+      "academicYear": "3 Year",
+      "bio": "No bio yet.",
+      "joinedDate": "Jul 2026",
+      "bookmarkedProjectIds": [],
+      "createdAt": "2026-07-07T14:56:19.341Z",
+      "passwordHash": "$2b$10$vVx4urx.6A6xirakgt10ZODyR25yHoLS.AgMlMiesexNicDEHSn8K"
     }
   },
   "projects": {
@@ -166,10 +210,10 @@
       "authorRegNo": "21MCA001",
       "dept": "ECE",
       "visibility": "Private",
-      "featured": false,
+      "featured": true,
       "recommended": true,
-      "homePage": false,
-      "favorite": false
+      "homePage": true,
+      "favorite": true
     },
     "104": {
       "projectId": "104",
@@ -246,6 +290,20 @@
       "time": "Just now",
       "timestamp": 1782981910014,
       "id": "wxknxvqam8"
+    },
+    "hw7yxxh8bs": {
+      "type": "join",
+      "text": "<strong>Test Student</strong> joined CampusRepo",
+      "time": "Just now",
+      "timestamp": 1783435558324,
+      "id": "hw7yxxh8bs"
+    },
+    "1scbci54sst": {
+      "type": "join",
+      "text": "<strong>Test Student Two</strong> joined CampusRepo",
+      "time": "Just now",
+      "timestamp": 1783436179419,
+      "id": "1scbci54sst"
     }
   }
 }

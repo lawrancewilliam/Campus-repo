@@ -493,12 +493,20 @@
                             <i class="fa-solid fa-building-columns input-icon"></i>
                             <select id="department" class="form-select" bind:value={formData.department} required>
                                 <option value="" disabled selected>Select Dept</option>
-                                <option value="CSE">Computer Science (CSE)</option>
-                                <option value="ECE">Electronics (ECE)</option>
-                                <option value="EEE">Electrical (EEE)</option>
-                                <option value="MECH">Mechanical (MECH)</option>
+                                <option value="CSE">Computer Science and Engineering (CSE)</option>
+                                <option value="IT">Information Technology (IT)</option>
+                                <option value="AI & DS">Artificial Intelligence and Data Science (AI & DS)</option>
+                                <option value="ECE">Electronics and Communication Engineering (ECE)</option>
+                                <option value="EEE">Electrical and Electronics Engineering (EEE)</option>
+                                <option value="MECH">Mechanical Engineering (MECH)</option>
+                                <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                                <option value="MCT">Mechatronics Engineering (MCT)</option>
+                                <option value="BME">Biomedical Engineering (BME)</option>
+                                <option value="CSD">Computer Science and Design (CSD)</option>
+                                <option value="FT">Fashion Technology (FT)</option>
                                 <option value="MCA">MCA</option>
                                 <option value="MBA">MBA</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                     </div>

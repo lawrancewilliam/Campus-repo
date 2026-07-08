@@ -1,10 +1,6 @@
 import { getApps, initializeApp, cert as firebaseCert } from 'firebase-admin/app';
 import { getFirestore, FieldValue as AdminFieldValue } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
-import { 
-    FIREBASE_PROJECT_ID, 
-    FIREBASE_STORAGE_BUCKET 
-} from '$env/static/private';
 import { env } from '$env/dynamic/private';
 import fs from 'fs';
 import path from 'path';
@@ -250,11 +246,11 @@ if (isConfigured) {
         try {
             app = initializeApp({
                 credential: firebaseCert({
-                    projectId: FIREBASE_PROJECT_ID,
+                    projectId: env.FIREBASE_PROJECT_ID || '',
                     clientEmail,
                     privateKey
                 }),
-                storageBucket: FIREBASE_STORAGE_BUCKET
+                storageBucket: env.FIREBASE_STORAGE_BUCKET || ''
             });
             console.log('✅ Firebase Admin SDK initialized successfully with service account cert.');
         } catch (err) {

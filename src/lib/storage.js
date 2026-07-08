@@ -1,3 +1,6 @@
+import { storage } from './assets/firebase.js';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 const isClient = typeof window !== 'undefined';
 
 // --- Client Session Helpers (Synchronous using LocalStorage) ---
@@ -154,26 +157,52 @@ export async function deleteStudent(regNo) {
 
 export async function uploadProject(projectMetadata, fileObj, author) {
     try {
-        const fd = new FormData();
-        fd.append('file', fileObj);
-        fd.append('title', projectMetadata.title);
-        fd.append('abstract', projectMetadata.abstract);
-        fd.append('category', projectMetadata.category || projectMetadata.domain || 'General');
-        fd.append('visibility', projectMetadata.visibility || 'Public');
+        const file = fileObj;
 
-        const res = await fetch('/api/projects/upload', {
+        // Determine storage paths
+        let folder = 'zips';
+        let fileType = 'zip';
+        if (file.name.toLowerCase().endsWith('.pdf')) {
+            folder = 'pdfs';
+            fileType = 'pdf';
+        } else if (file.name.toLowerCase().endsWith('.ppt') || file.name.toLowerCase().endsWith('.pptx')) {
+            folder = 'ppts';
+            fileType = 'ppt';
+        } else if (file.name.toLowerCase().endsWith('.md') || file.name.toLowerCase().endsWith('.txt')) {
+            folder = 'readmes';
+            fileType = 'text';
+        }
+
+        const destinationPath = `campus-repo/${folder}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, destinationPath);
+
+        // 1. Upload straight to Firebase Storage from the browser client
+        const snapshot = await uploadBytes(storageRef, file);
+        const fileUrl = await getDownloadURL(snapshot.ref);
+
+        // 2. Post the payload text data along with the URL to SvelteKit serverless backend
+        const response = await fetch('/api/projects/upload', {
             method: 'POST',
-            body: fd
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...projectMetadata,
+                fileUrl,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType,
+                destinationPath
+            })
         });
-        const result = await res.json();
-        
+
+        const result = await response.json();
+
         if (result.success) {
-            await logActivity('upload', `<strong>${author.name}</strong> uploaded <strong>${projectMetadata.title}</strong>`, "Just now");
+            await logActivity('upload', `<strong>${author.name || author.username || 'Student'}</strong> uploaded <strong>${projectMetadata.title || projectMetadata.projectName}</strong>`, "Just now");
         }
         return result;
     } catch (e) {
         console.error('uploadProject failed:', e);
-        return { success: false, message: e.message || 'Server error' };
+        return { success: false, message: e.message || 'Server error during upload.' };
     }
 }
 
