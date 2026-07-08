@@ -24,7 +24,8 @@ export async function POST({ request }) {
 		}
 
 		// 3. Check if Email already exists
-		const emailSnap = await studentsRef.where('email', '==', email).limit(1).get();
+		const normalizedEmail = email.trim().toLowerCase();
+		const emailSnap = await studentsRef.where('email', '==', normalizedEmail).limit(1).get();
 		if (!emailSnap.empty) {
 			return json({ success: false, message: 'Email already exists.' }, { status: 400 });
 		}
@@ -37,7 +38,7 @@ export async function POST({ request }) {
 			userId: registerNumber,
 			username: name,
 			name: name,
-			email: email,
+			email: normalizedEmail,
 			mobile: mobile || '',
 			registerNumber: registerNumber,
 			department: department || 'CSE',
@@ -60,6 +61,6 @@ export async function POST({ request }) {
 
 	} catch (error) {
 		console.error('Registration error:', error);
-		return json({ success: false, message: 'Internal server error during registration.' }, { status: 500 });
+		return json({ success: false, message: error.message || 'Internal server error during registration.' }, { status: 500 });
 	}
 }

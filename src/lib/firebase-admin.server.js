@@ -6,10 +6,18 @@ import fs from 'fs';
 import path from 'path';
 
 const clientEmail = env.FIREBASE_CLIENT_EMAIL || '';
-// Replace escaped newlines in private key
-const privateKey = env.FIREBASE_PRIVATE_KEY 
-    ? env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
-    : '';
+let privateKey = env.FIREBASE_PRIVATE_KEY || '';
+
+if (privateKey) {
+    // Strip leading/trailing quotes (single or double) if present
+    privateKey = privateKey.trim();
+    if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || 
+        (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
+        privateKey = privateKey.slice(1, -1);
+    }
+    // Replace escaped newlines
+    privateKey = privateKey.replace(/\\n/g, '\n');
+}
 
 let app = null;
 let adminDbVal = null;
@@ -187,7 +195,19 @@ class MockFirestore {
         }
     }
     writeDb(data) {
-        fs.writeFileSync(this.dbPath, JSON.stringify(data, null, 2));
+        try {
+            fs.writeFileSync(this.dbPath, JSON.stringify(data, null, 2));
+        } catch (e) {
+            console.error(`❌ [Mock Database Error] Failed to write database to: ${this.dbPath}.`, e);
+            const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+            if (isProduction) {
+                throw new Error(
+                    'Database write failed: The server is running in a read-only environment (Vercel/production) and fallback Mock Database cannot write to local-db.json. ' +
+                    'Please make sure you have configured FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY in your Vercel project environment variables.'
+                );
+            }
+            throw e;
+        }
     }
     collection(collectionName) {
         return new MockCollection(this, collectionName);
@@ -202,26 +222,50 @@ class MockFile {
         this.destinationPath = destinationPath;
     }
     async save(buffer, options) {
-        const localDir = path.resolve(process.cwd(), 'static', 'uploads');
-        if (!fs.existsSync(localDir)) {
-            fs.mkdirSync(localDir, { recursive: true });
+        try {
+            const localDir = path.resolve(process.cwd(), 'static', 'uploads');
+            if (!fs.existsSync(localDir)) {
+                fs.mkdirSync(localDir, { recursive: true });
+            }
+            const fileName = path.basename(this.destinationPath);
+            const localPath = path.join(localDir, fileName);
+            fs.writeFileSync(localPath, buffer);
+            console.log(`✅ [Mock Storage] Saved file locally to: ${localPath}`);
+        } catch (e) {
+            console.error(`❌ [Mock Storage Error] Failed to save file locally.`, e);
+            const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+            if (isProduction) {
+                throw new Error(
+                    'Storage upload failed: The server is running in a read-only environment (Vercel/production) and fallback Mock Storage cannot write to local file system. ' +
+                    'Please make sure you have configured FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY in your Vercel project environment variables.'
+                );
+            }
+            throw e;
         }
-        const fileName = path.basename(this.destinationPath);
-        const localPath = path.join(localDir, fileName);
-        fs.writeFileSync(localPath, buffer);
-        console.log(`✅ [Mock Storage] Saved file locally to: ${localPath}`);
     }
     async getSignedUrl(options) {
         const fileName = path.basename(this.destinationPath);
         return [`/uploads/${fileName}`];
     }
     async delete() {
-        const localDir = path.resolve(process.cwd(), 'static', 'uploads');
-        const fileName = path.basename(this.destinationPath);
-        const localPath = path.join(localDir, fileName);
-        if (fs.existsSync(localPath)) {
-            fs.unlinkSync(localPath);
-            console.log(`✅ [Mock Storage] Deleted local file: ${localPath}`);
+        try {
+            const localDir = path.resolve(process.cwd(), 'static', 'uploads');
+            const fileName = path.basename(this.destinationPath);
+            const localPath = path.join(localDir, fileName);
+            if (fs.existsSync(localPath)) {
+                fs.unlinkSync(localPath);
+                console.log(`✅ [Mock Storage] Deleted local file: ${localPath}`);
+            }
+        } catch (e) {
+            console.error(`❌ [Mock Storage Error] Failed to delete local file.`, e);
+            const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+            if (isProduction) {
+                throw new Error(
+                    'Storage delete failed: The server is running in a read-only environment (Vercel/production) and fallback Mock Storage cannot write to local file system. ' +
+                    'Please make sure you have configured FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY in your Vercel project environment variables.'
+                );
+            }
+            throw e;
         }
     }
 }
@@ -255,6 +299,11 @@ if (isConfigured) {
             console.log('✅ Firebase Admin SDK initialized successfully with service account cert.');
         } catch (err) {
             console.error('❌ Failed to initialize Firebase Admin SDK with cert:', err);
+            // Print key diagnostic info
+            const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+            if (isProduction) {
+                throw new Error(`Failed to initialize Firebase Admin SDK in production: ${err.message}. Please check that your FIREBASE_PRIVATE_KEY and FIREBASE_CLIENT_EMAIL are correct and properly formatted.`);
+            }
         }
     } else {
         app = getApps()[0];
@@ -262,11 +311,18 @@ if (isConfigured) {
     adminDbVal = app ? getFirestore(app) : new MockFirestore();
     adminStorageVal = app ? getStorage(app) : new MockStorage();
 } else {
-    console.warn('⚠️ FIREBASE_CLIENT_EMAIL and/or FIREBASE_PRIVATE_KEY are missing from env. Using local Mock Database & Storage fallbacks.');
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+    if (isProduction) {
+        console.error('❌ FIREBASE_CLIENT_EMAIL and/or FIREBASE_PRIVATE_KEY are missing from env in production/Vercel.');
+    } else {
+        console.warn('⚠️ FIREBASE_CLIENT_EMAIL and/or FIREBASE_PRIVATE_KEY are missing from env. Using local Mock Database & Storage fallbacks.');
+    }
     adminDbVal = new MockFirestore();
     adminStorageVal = new MockStorage();
-    console.log(`ℹ️ [Local Database Config] Student details and project metadata will save to: ${path.resolve(process.cwd(), 'local-db.json')}`);
-    console.log(`ℹ️ [Local Storage Config] Project files will upload to directory: ${path.resolve(process.cwd(), 'static', 'uploads')}`);
+    if (!isProduction) {
+        console.log(`ℹ️ [Local Database Config] Student details and project metadata will save to: ${path.resolve(process.cwd(), 'local-db.json')}`);
+        console.log(`ℹ️ [Local Storage Config] Project files will upload to directory: ${path.resolve(process.cwd(), 'static', 'uploads')}`);
+    }
 }
 
 export const adminDb = adminDbVal;

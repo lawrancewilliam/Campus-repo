@@ -87,32 +87,27 @@
 
         try {
             // Guard against cross logins
-            if (currentRole === 'student') {
-                if (identifier === 'admin') {
-                    showToast("This account belongs to an Administrator. Please switch to Admin Login Mode.", "error");
-                    isLoading = false;
-                    return;
-                }
-                const studentsList = await getStudents();
-                const adminUser = studentsList.find(s => (s.registerNumber === identifier || s.email === identifier) && s.role === 'admin');
-                if (adminUser) {
-                    showToast("This account belongs to an Administrator. Please switch to Admin Login Mode.", "error");
-                    isLoading = false;
-                    return;
-                }
-            }
-
-            if (currentRole === 'admin') {
-                const studentsList = await getStudents();
-                const student = studentsList.find(s => (s.registerNumber === identifier || s.email === identifier) && s.role !== 'admin');
-                if (student) {
+            const studentsList = await getStudents();
+            const lookup = identifier.trim().toLowerCase();
+            const user = studentsList.find(s => 
+                (s.registerNumber && s.registerNumber.toLowerCase() === lookup) || 
+                (s.email && s.email.toLowerCase() === lookup)
+            );
+            
+            if (user) {
+                if (currentRole === 'admin' && user.role !== 'admin') {
                     showToast("This account belongs to a Student. Please switch to Student Login Mode.", "error");
                     isLoading = false;
                     return;
                 }
+                if (currentRole === 'student' && user.role === 'admin') {
+                    showToast("Invalid register number/email or password.", "error");
+                    isLoading = false;
+                    return;
+                }
             }
 
-            const result = await loginUser(identifier, password);
+            const result = await loginUser(identifier, password, currentRole);
 
             if (result.success) {
                 showToast("Login Successful!", "success");

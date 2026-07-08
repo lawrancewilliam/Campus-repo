@@ -4,49 +4,56 @@ import { json } from '@sveltejs/kit';
 
 export async function POST({ request, cookies }) {
     try {
-        const { username, password } = await request.json();
+        const { username, password, role } = await request.json();
+
+        // Ensure admin user exists before any login attempt. This is the most reliable location for this logic.
+        const adminRef = adminDb.collection('students').doc('admin');
+        const adminSnap = await adminRef.get();
+        if (!adminSnap.exists) {
+            const adminPasswordHash = await hashPassword('Admin@1234');
+            const adminUser = {
+                userId: 'admin',
+                registerNumber: 'admin',
+                email: 'admin@sonatech.ac.in',
+                name: 'Admin',
+                username: 'Admin',
+                role: 'admin',
+                department: 'IT',
+                passwordHash: adminPasswordHash,
+                createdAt: new Date().toISOString()
+            };
+            await adminRef.set(adminUser);
+            console.log('✅ Admin user created in Firestore during login check.');
+        }
         
         if (!username || !password) {
             return json({ success: false, message: 'Missing username or password.' }, { status: 400 });
         }
+
+        const lookup = username.trim();
+        const lookupLower = lookup.toLowerCase();
+        const lookupUpper = lookup.toUpperCase();
 
         // Unified login check for students and admins
         let student = null;
         let studentDocRef = null;
         const studentsRef = adminDb.collection('students');
         
-        if (username === 'admin') {
-            const adminDoc = await studentsRef.doc('admin').get();
-            if (!adminDoc.exists) {
-                const adminPasswordHash = await hashPassword('Admin@1234');
-                const mockAdmin = {
-                    userId: "admin",
-                    username: "admin",
-                    name: "Admin",
-                    email: "admin@sonatech.ac.in",
-                    passwordHash: adminPasswordHash,
-                    registerNumber: "admin",
-                    role: "admin",
-                    department: "Admin",
-                    academicYear: "N/A",
-                    bio: "Built-in Administrator account.",
-                    joinedDate: "Jul 2026",
-                    bookmarkedProjectIds: []
-                };
-                await studentsRef.doc('admin').set(mockAdmin);
-                console.log('✅ Seeded built-in admin account during login.');
-            }
+        // Attempt search by register number (document ID) using cased variants
+        let docSnap = await studentsRef.doc(lookup).get();
+        if (!docSnap.exists) {
+            docSnap = await studentsRef.doc(lookupUpper).get();
         }
-
-        // Attempt search by register number (document ID)
-        const docSnap = await studentsRef.doc(username).get();
+        if (!docSnap.exists) {
+            docSnap = await studentsRef.doc(lookupLower).get();
+        }
         
         if (docSnap.exists) {
             student = docSnap.data();
             studentDocRef = docSnap.ref; // Ensure ref is set when found by doc ID
         } else {
             // Attempt search by email
-            const querySnap = await studentsRef.where('email', '==', username).limit(1).get();
+            const querySnap = await studentsRef.where('email', '==', lookupLower).limit(1).get();
             if (!querySnap.empty) {
                 studentDocRef = querySnap.docs[0].ref;
                 student = querySnap.docs[0].data();
@@ -95,6 +102,10 @@ export async function POST({ request, cookies }) {
                 }
 
                 const userRole = student.role || 'student'; // Default to 'student' if role is not set
+
+                if (role && role !== userRole) {
+                    return json({ success: false, message: 'Invalid register number/email or password.' }, { status: 401 });
+                }
 
                 const token = generateToken({
                     userId: student.registerNumber,

@@ -9,12 +9,20 @@ import { browser } from '$app/environment';
 // Initialize with data from localStorage if in the browser, otherwise null.
 const initialSession = browser ? JSON.parse(localStorage.getItem('session')) : null;
 
-export const session = writable(initialSession);
+const { subscribe, set } = writable(initialSession);
 
-// When the session store changes, update localStorage.
-if (browser) {
-	session.subscribe((value) => {
-		// If value is not null, stringify and store it. Otherwise, remove it.
-		localStorage.setItem('session', value ? JSON.stringify(value) : null);
-	});
-}
+export const session = {
+	subscribe,
+	set: (value) => {
+		if (browser) {
+			localStorage.setItem('session', value ? JSON.stringify(value) : null);
+		}
+		set(value);
+	},
+	logout: () => {
+		if (browser) {
+			localStorage.removeItem('session');
+		}
+		set(null);
+	}
+};

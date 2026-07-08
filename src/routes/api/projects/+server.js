@@ -2,10 +2,31 @@ import { adminDb, adminStorage } from '$lib/firebase-admin.server.js';
 import { json } from '@sveltejs/kit';
 import fs from 'fs';
 import path from 'path';
+import { hashPassword } from '$lib/auth.server.js';
 
 // Seed data function to prepopulate Firestore if empty (now utilizing Admin SDK)
 async function checkAndSeed() {
     try {
+        // Ensure admin user exists. This provides robust, self-healing admin creation.
+        const adminRef = adminDb.collection('students').doc('admin');
+        const adminSnap = await adminRef.get();
+        if (!adminSnap.exists) {
+            const adminPasswordHash = await hashPassword('Admin@1234');
+            const adminUser = {
+                userId: 'admin',
+                registerNumber: 'admin',
+                email: 'admin@sonatech.ac.in',
+                name: 'Admin',
+                username: 'Admin',
+                role: 'admin',
+                department: 'IT',
+                passwordHash: adminPasswordHash,
+                createdAt: new Date().toISOString()
+            };
+            await adminRef.set(adminUser);
+            console.log('✅ Admin user created in Firestore via checkAndSeed.');
+        }
+
         const studentsSnap = await adminDb.collection('students').limit(1).get();
         if (studentsSnap.empty) {
             const mockStudent = {
