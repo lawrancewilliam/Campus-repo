@@ -213,14 +213,16 @@
         border-color: #ef4444;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 950px) {
         .profile-details { display: none; }
-        .nav-link span { display: none; }
         .logout-btn-nav span { display: none; }
         .logout-btn-nav { padding: 0.5rem; width: 36px; height: 36px; justify-content: center; }
+     }
+    @media (max-width: 680px) {
+        .nav-link span { display: none; }
+        .logo span { display: none; }
     }
     @media (max-width: 480px) {
-        .logo span { display: none; }
         .badge-admin { font-size: 0.6rem; padding: 1px 4px; margin-left: 0.15rem; }
         .nav-container { padding: 0 0.5rem; }
         .navbar-actions { gap: 0.4rem; }

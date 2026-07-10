@@ -205,14 +205,16 @@
         border-color: #ef4444;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 950px) {
         .profile-details { display: none; }
-        .nav-link span { display: none; }
         .logout-btn-nav span { display: none; }
         .logout-btn-nav { padding: 0.5rem; width: 36px; height: 36px; justify-content: center; }
     }
-    @media (max-width: 480px) {
+    @media (max-width: 680px) {
+        .nav-link span { display: none; }
         .logo span { display: none; }
+    }
+    @media (max-width: 480px) {
         .nav-container { padding: 0 0.5rem; }
         .navbar-actions { gap: 0.4rem; }
         .nav-menu { gap: 0.15rem; }
