@@ -62,6 +62,9 @@
 
     async function simulateDownload(project) {
         await incrementProjectDownloads(project.id);
+        if (project.firebaseStorageUrl) {
+            window.open(project.firebaseStorageUrl, '_blank');
+        }
         toastState.show(`Downloaded: ${project.fileName || 'source_code.zip'} successfully.`, "success", "✅ File Downloaded");
         await loadData();
     }

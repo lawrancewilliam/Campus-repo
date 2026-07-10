@@ -46,7 +46,10 @@
 
     async function handleDownload(project) {
         await incrementProjectDownloads(project.id);
-        toastState.show(`File "${project.fileName || 'source_code.zip'}" downloaded.`, "success", "✅ File Downloaded");
+        if (project.firebaseStorageUrl) {
+            window.open(project.firebaseStorageUrl, '_blank');
+        }
+        toastState.show(`File "${project.fileName || 'source_code.zip'}" download started.`, "success", "✅ File Downloaded");
         await loadData();
     }
 

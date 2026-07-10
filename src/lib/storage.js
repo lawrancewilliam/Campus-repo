@@ -1,9 +1,6 @@
-import { storage } from './assets/firebase.js';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-
 const isClient = typeof window !== 'undefined';
 
-// --- Client Session Helpers (Synchronous using LocalStorage) ---
+// Client Session Helpers (Synchronous using LocalStorage)
 function getLocal(key, defaultValue = null) {
     if (!isClient) return defaultValue;
     const val = localStorage.getItem(key);
@@ -157,41 +154,18 @@ export async function deleteStudent(regNo) {
 
 export async function uploadProject(projectMetadata, fileObj, author) {
     try {
-        const file = fileObj;
-
-        // Determine storage paths
-        let folder = 'zips';
-        let fileType = 'zip';
-        if (file.name.toLowerCase().endsWith('.pdf')) {
-            folder = 'pdfs';
-            fileType = 'pdf';
-        } else if (file.name.toLowerCase().endsWith('.ppt') || file.name.toLowerCase().endsWith('.pptx')) {
-            folder = 'ppts';
-            fileType = 'ppt';
-        } else if (file.name.toLowerCase().endsWith('.md') || file.name.toLowerCase().endsWith('.txt')) {
-            folder = 'readmes';
-            fileType = 'text';
+        const formData = new FormData();
+        formData.append('file', fileObj);
+        
+        for (const [key, value] of Object.entries(projectMetadata)) {
+            if (value !== undefined && value !== null) {
+                formData.append(key, value);
+            }
         }
 
-        const destinationPath = `campus-repo/${folder}/${Date.now()}_${file.name}`;
-        const storageRef = ref(storage, destinationPath);
-
-        // 1. Upload straight to Firebase Storage from the browser client
-        const snapshot = await uploadBytes(storageRef, file);
-        const fileUrl = await getDownloadURL(snapshot.ref);
-
-        // 2. Post the payload text data along with the URL to SvelteKit serverless backend
         const response = await fetch('/api/projects/upload', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...projectMetadata,
-                fileUrl,
-                fileName: file.name,
-                fileSize: file.size,
-                fileType,
-                destinationPath
-            })
+            body: formData
         });
 
         const result = await response.json();
