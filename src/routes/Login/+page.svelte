@@ -45,15 +45,7 @@
     }
 
     function forgotPassword() {
-        if (!identifier) {
-            showToast("Please enter your ID first.", "error");
-            return;
-        }
-        if (currentRole === 'admin') {
-            alert("Admin password reset: Please contact the IT Support team.");
-        } else {
-            alert(`Password reset link sent to: ${identifier}`);
-        }
+        alert("Password Reset: Please contact the IT Support / College Admin office to reset your password.");
     }
 
     function showToast(message, type = 'success') {
