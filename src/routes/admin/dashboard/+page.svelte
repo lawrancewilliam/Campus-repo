@@ -45,6 +45,23 @@
             percentage: Math.round((count / maxVal) * 100)
         })).sort((a, b) => b.count - a.count);
     }
+
+    function formatRelativeTime(timestamp, timeFallback) {
+        if (!timestamp || isNaN(Number(timestamp))) {
+            return timeFallback || 'Just now';
+        }
+        const diff = Date.now() - Number(timestamp);
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (seconds < 5) return 'Just now';
+        if (seconds < 60) return `${seconds}s ago`;
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
+    }
 </script>
 
 <svelte:head>
@@ -151,7 +168,7 @@
                         </div>
                         <div class="activity-details">
                             <p class="activity-text">{@html activity.text}</p>
-                            <span class="activity-time">{activity.time}</span>
+                            <span class="activity-time">{formatRelativeTime(activity.timestamp, activity.time)}</span>
                         </div>
                     </div>
                 {:else}
@@ -282,7 +299,7 @@
         .analytics-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 576px) {
-        .main-container { padding: 1.5rem 1rem; }
+        .main-container { padding: 1.5rem 0.75rem; }
         .admin-welcome { padding: 2rem 1.25rem; text-align: center; }
         .admin-welcome h1 { font-size: 1.65rem; }
         .stats-grid { grid-template-columns: 1fr; }

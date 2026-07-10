@@ -114,6 +114,23 @@
             alert(res.message || "Failed to update project.");
         }
     }
+
+    function formatRelativeTime(timestamp, timeFallback) {
+        if (!timestamp || isNaN(Number(timestamp))) {
+            return timeFallback || 'Just now';
+        }
+        const diff = Date.now() - Number(timestamp);
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (seconds < 5) return 'Just now';
+        if (seconds < 60) return `${seconds}s ago`;
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
+    }
 </script>
 
 <svelte:head>
@@ -263,7 +280,7 @@
                         </div>
                         <div class="activity-details">
                             <p class="activity-text">{@html activity.text}</p>
-                            <span class="activity-time">{activity.time}</span>
+                            <span class="activity-time">{formatRelativeTime(activity.timestamp, activity.time)}</span>
                         </div>
                     </div>
                 {:else}
@@ -523,7 +540,7 @@
     }
     .list-info { flex: 1; min-width: 0; }
     .list-info h4 { font-size: 0.95rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
-    .list-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; gap: 0.5rem; margin-top: 0.25rem; align-items: center; }
+    .list-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem; align-items: center; }
     
     .badge {
         padding: 2px 6px;
@@ -664,6 +681,7 @@
     }
 
     @media (max-width: 576px) {
+        .main-container { padding: 1.5rem 0.75rem; }
         .stats-grid { grid-template-columns: 1fr; }
         .dash-welcome { padding: 2rem 1.25rem; text-align: center; }
         .dash-welcome h1 { font-size: 1.65rem; }
@@ -671,6 +689,8 @@
         .hero-actions { flex-direction: column; gap: 0.75rem; }
         .hero-actions .btn { width: 100%; justify-content: center; box-sizing: border-box; }
         .panel { padding: 1rem; }
+        .list-item { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+        .list-actions { justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 0.5rem; }
         .modal-card { max-width: 95%; margin: 10px; }
         .modal-body { padding: 1rem; gap: 1rem; }
         .radio-group-horizontal { flex-direction: column; align-items: flex-start; gap: 0.5rem; }

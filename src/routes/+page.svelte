@@ -142,7 +142,7 @@
                     </div>
                     <h2 class="section-title">Access Restricted</h2>
                     <p>The project repository is exclusive to registered college students. Please log in to view source codes, download reports, and explore projects uploaded by your peers.</p>
-                    <div style="display: flex; gap: 1rem;">
+                    <div class="locked-buttons">
                         <button class="btn btn-primary" onclick={navigateToLogin}>Login to View Projects</button>
                         <button class="btn btn-outline" onclick={navigateToRegister}>Create New Account</button>
                     </div>
@@ -686,8 +686,17 @@
         .hero-image { transform: none !important; }
     }
 
+    .locked-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
     @media (max-width: 576px) {
         .stats-grid { grid-template-columns: 1fr; gap: var(--space-24); }
+        .locked-buttons { flex-direction: column; gap: 0.75rem; width: 100%; }
+        .locked-buttons .btn { width: 100%; justify-content: center; }
     }
 
     @keyframes slide-up {
