@@ -67,10 +67,10 @@
             return;
         }
 
-        // Determine which file is the primary file to upload
-        const fileToUpload = files.sourceCode || files.report || files.presentation || files.readme;
-        if (!fileToUpload) {
-            alert("Please select at least one file to upload (Source Code ZIP, Report PDF, or Presentation PPT).");
+        // Check if at least one file is selected
+        const hasFile = files.sourceCode || files.report || files.presentation || files.readme;
+        if (!hasFile) {
+            alert("Please select at least one file to upload (Source Code ZIP, Report PDF, Presentation PPT, or README File).");
             return;
         }
 
@@ -82,7 +82,7 @@
                 title: formData.title,
                 abstract: formData.abstract,
                 category: formData.domain,
-            }, fileToUpload, session.user);
+            }, files, session.user);
 
             isUploading = false;
             

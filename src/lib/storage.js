@@ -152,10 +152,14 @@ export async function deleteStudent(regNo) {
     }
 }
 
-export async function uploadProject(projectMetadata, fileObj, author) {
+export async function uploadProject(projectMetadata, filesObj, author) {
     try {
         const formData = new FormData();
-        formData.append('file', fileObj);
+        
+        if (filesObj.sourceCode) formData.append('file_sourceCode', filesObj.sourceCode);
+        if (filesObj.report) formData.append('file_report', filesObj.report);
+        if (filesObj.presentation) formData.append('file_presentation', filesObj.presentation);
+        if (filesObj.readme) formData.append('file_readme', filesObj.readme);
         
         for (const [key, value] of Object.entries(projectMetadata)) {
             if (value !== undefined && value !== null) {

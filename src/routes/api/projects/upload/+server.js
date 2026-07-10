@@ -1,5 +1,6 @@
 import { adminDb, adminStorage } from '$lib/firebase-admin.server.js';
 import { json } from '@sveltejs/kit';
+import JSZip from 'jszip';
 
 export async function POST({ request, locals }) {
     try {
@@ -8,7 +9,11 @@ export async function POST({ request, locals }) {
         }
 
         const formData = await request.formData();
-        const file = formData.get('file');
+        const file_sourceCode = formData.get('file_sourceCode');
+        const file_report = formData.get('file_report');
+        const file_presentation = formData.get('file_presentation');
+        const file_readme = formData.get('file_readme');
+
         const title = formData.get('title');
         const abstract = formData.get('abstract');
         const category = formData.get('category') || formData.get('domain') || 'General';
@@ -25,46 +30,43 @@ export async function POST({ request, locals }) {
         const toolsUsed = formData.get('toolsUsed') || '';
         const tags = formData.get('tags') || '';
 
-        if (!file || !title || !abstract) {
-            return json({ success: false, message: 'Missing required project details or file.' }, { status: 400 });
+        if (!title || !abstract) {
+            return json({ success: false, message: 'Missing required project title or abstract.' }, { status: 400 });
         }
 
-        const fileName = file.name;
-        const fileSize = file.size;
+        // Collect all uploaded files
+        const filesToBundle = [];
+        if (file_sourceCode) filesToBundle.push({ name: file_sourceCode.name, file: file_sourceCode });
+        if (file_report) filesToBundle.push({ name: file_report.name, file: file_report });
+        if (file_presentation) filesToBundle.push({ name: file_presentation.name, file: file_presentation });
+        if (file_readme) filesToBundle.push({ name: file_readme.name, file: file_readme });
 
-        // Validate maximum file size (100MB)
-        const maxFileSize = 100 * 1024 * 1024;
-        if (fileSize > maxFileSize) {
-            return json({ success: false, message: 'File size exceeds 100MB limit.' }, { status: 400 });
+        if (filesToBundle.length === 0) {
+            return json({ success: false, message: 'Please upload at least one project file (Source Code ZIP, PDF Report, Presentation PPT, or README).' }, { status: 400 });
         }
 
-        // Determine destination folder in Firebase Storage
-        let folder = 'zips';
-        let fileType = 'zip';
-        const lowerName = fileName.toLowerCase();
-        if (lowerName.endsWith('.pdf')) {
-            folder = 'pdfs';
-            fileType = 'pdf';
-        } else if (lowerName.endsWith('.ppt') || lowerName.endsWith('.pptx')) {
-            folder = 'ppts';
-            fileType = 'ppt';
-        } else if (lowerName.endsWith('.md') || lowerName.endsWith('.txt')) {
-            folder = 'readmes';
-            fileType = 'text';
+        // Initialize JSZip and add all files
+        const zip = new JSZip();
+        for (const item of filesToBundle) {
+            const arrayBuffer = await item.file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            zip.file(item.name, buffer);
         }
 
-        // Convert the File object to a Buffer
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        // Generate combined ZIP in memory as a Node Buffer
+        const combinedBuffer = await zip.generateAsync({ type: 'nodebuffer' });
 
-        const destinationPath = `campus-repo/${folder}/${Date.now()}_${fileName}`;
+        const cleanTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
+        const bundleFileName = `${Date.now()}_${cleanTitle}_Bundle.zip`;
+        const destinationPath = `campus-repo/zips/${bundleFileName}`;
+
         const bucket = adminStorage.bucket();
         const storageFile = bucket.file(destinationPath);
 
-        // Upload bytes using the Admin SDK
-        await storageFile.save(buffer, {
+        // Upload combined bytes using Admin Storage SDK (with local fallback mock)
+        await storageFile.save(combinedBuffer, {
             metadata: {
-                contentType: file.type || 'application/octet-stream'
+                contentType: 'application/zip'
             }
         });
 
@@ -78,7 +80,6 @@ export async function POST({ request, locals }) {
             downloadUrl = signedUrl;
         } catch (signedErr) {
             console.warn('⚠️ getSignedUrl failed, falling back to public storage URL:', signedErr.message);
-            // Fallback public read URL (works if public read rules are active)
             const bucketName = process.env.FIREBASE_STORAGE_BUCKET || 'campus-repo-bcdd3.firebasestorage.app';
             downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(destinationPath)}?alt=media`;
         }
@@ -91,9 +92,9 @@ export async function POST({ request, locals }) {
             description: abstract,
             uploadedBy: locals.user.username || locals.user.name || 'Student',
             userId: locals.user.userId || locals.user.registerNumber,
-            fileType: fileType,
-            fileName: fileName,
-            fileSize: fileSize,
+            fileType: 'zip',
+            fileName: bundleFileName,
+            fileSize: combinedBuffer.length,
             firebaseStorageUrl: downloadUrl,
             storagePath: destinationPath,
             createdAt: new Date().toISOString(),
@@ -134,7 +135,7 @@ export async function POST({ request, locals }) {
         return json({ success: true, project: projectData });
 
     } catch (e) {
-        console.error('File upload error on backend:', e);
-        return json({ success: false, message: e.message || 'Failed to upload project.' }, { status: 500 });
+        console.error('File bundle upload error on backend:', e);
+        return json({ success: false, message: e.message || 'Failed to upload and bundle project.' }, { status: 500 });
     }
 }
