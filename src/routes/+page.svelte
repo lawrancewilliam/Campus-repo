@@ -683,6 +683,7 @@
         .hero-text p { margin-inline: auto; }
         .hero-buttons { justify-content: center; flex-direction: column; gap: var(--space-12); }
         .hero-buttons .btn { width: 100%; justify-content: center; box-sizing: border-box; }
+        .hero-image-wrapper { max-width: 300px; margin: var(--space-32) auto 0; }
         .hero-image { transform: none !important; }
     }
 
