@@ -92,7 +92,9 @@
                     "success", 
                     "✅ Project Uploaded Successfully!"
                 );
-                window.location.href = '/student/dashboard';
+                setTimeout(() => {
+                    window.location.href = '/student/dashboard';
+                }, 2500);
             } else {
                 alert(result.message || "Upload failed. Please try again.");
             }

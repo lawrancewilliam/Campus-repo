@@ -101,7 +101,9 @@
             
             if (result.success) {
                 toastState.show("Your project has been saved and is now available for viewing.", "success");
-                window.location.href = '/admin/dashboard';
+                setTimeout(() => {
+                    window.location.href = '/admin/dashboard';
+                }, 2500);
             } else {
                 alert(result.message || "Upload failed. Please try again.");
             }
