@@ -392,6 +392,12 @@
         .login-form-container { padding: 2rem; }
         .nav-links { display: none; }
     }
+    @media (max-width: 480px) {
+        .login-visual { display: none; }
+        .login-wrapper { padding: 0.5rem; }
+        .login-form-container { padding: 1.5rem 1rem; }
+        .logo span { display: none; }
+    }
 </style>
 
 <!-- TOAST CONTAINER -->
@@ -408,7 +414,7 @@
 <header class="navbar">
     <div class="container nav-container">
         <a href="/" class="logo">
-            <i class="fa-solid fa-graduation-cap"></i> CampusRepo
+            <i class="fa-solid fa-graduation-cap"></i> <span>CampusRepo</span>
         </a>
         <nav class="nav-links">
             <a href="/">Home</a>

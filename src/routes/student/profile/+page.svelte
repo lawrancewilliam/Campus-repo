@@ -452,5 +452,14 @@
         .profile-avatar-large { width: 80px; height: 80px; font-size: 2rem; margin-bottom: 0.5rem; }
         .mini-stats { display: none; }
         .danger-actions { flex-direction: column; gap: 1rem; text-align: center; }
+        .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+    }
+    @media (max-width: 576px) {
+        .settings-card { padding: 1.25rem; }
+        .card-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .edit-actions { width: 100%; }
+        .edit-actions button { flex: 1; text-align: center; justify-content: center; }
+        .tab-btn { padding: 0.5rem 1rem; font-size: 0.85rem; }
+        .btn-danger { width: 100%; justify-content: center; }
     }
 </style>

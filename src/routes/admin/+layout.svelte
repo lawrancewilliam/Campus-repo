@@ -24,15 +24,15 @@
     <header class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
-                <i class="fa-solid fa-graduation-cap"></i> CampusRepo <span class="badge-admin">Admin</span>
+                <i class="fa-solid fa-graduation-cap"></i> <span>CampusRepo</span> <span class="badge-admin">Admin</span>
             </a>
             
             <nav class="nav-menu" aria-label="Main navigation">
-                <a href="/admin/dashboard" class="nav-link" class:active={$page.url.pathname === '/admin/dashboard'}><i class="fa-solid fa-gauge"></i> Dashboard</a>
-                <a href="/admin/users" class="nav-link" class:active={$page.url.pathname === '/admin/users'}><i class="fa-solid fa-users"></i> Users</a>
-                <a href="/admin/uploads" class="nav-link" class:active={$page.url.pathname === '/admin/uploads'}><i class="fa-solid fa-folder-open"></i> Projects</a>
-                <a href="/admin/upload" class="nav-link" class:active={$page.url.pathname === '/admin/upload'}><i class="fa-solid fa-cloud-arrow-up"></i> Upload</a>
-                <a href="/admin/profile" class="nav-link" class:active={$page.url.pathname === '/admin/profile'}><i class="fa-solid fa-user-shield"></i> Profile</a>
+                <a href="/admin/dashboard" class="nav-link" class:active={$page.url.pathname === '/admin/dashboard'}><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
+                <a href="/admin/users" class="nav-link" class:active={$page.url.pathname === '/admin/users'}><i class="fa-solid fa-users"></i> <span>Users</span></a>
+                <a href="/admin/uploads" class="nav-link" class:active={$page.url.pathname === '/admin/uploads'}><i class="fa-solid fa-folder-open"></i> <span>Projects</span></a>
+                <a href="/admin/upload" class="nav-link" class:active={$page.url.pathname === '/admin/upload'}><i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload</span></a>
+                <a href="/admin/profile" class="nav-link" class:active={$page.url.pathname === '/admin/profile'}><i class="fa-solid fa-user-shield"></i> <span>Profile</span></a>
             </nav>
             
             <div class="navbar-actions">
@@ -56,7 +56,7 @@
 
                 <!-- Logout Button -->
                 <button onclick={() => { logout(); window.location.href = '/Login'; }} class="logout-btn-nav" title="Logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
                 </button>
             </div>
         </div>
@@ -216,5 +216,15 @@
     @media (max-width: 768px) {
         .profile-details { display: none; }
         .nav-link span { display: none; }
+        .logout-btn-nav span { display: none; }
+        .logout-btn-nav { padding: 0.5rem; width: 36px; height: 36px; justify-content: center; }
+    }
+    @media (max-width: 480px) {
+        .logo span { display: none; }
+        .badge-admin { font-size: 0.6rem; padding: 1px 4px; margin-left: 0.15rem; }
+        .nav-container { padding: 0 0.5rem; }
+        .navbar-actions { gap: 0.4rem; }
+        .nav-menu { gap: 0.15rem; }
+        .nav-link { padding: 0.5rem 0.5rem; }
     }
 </style>

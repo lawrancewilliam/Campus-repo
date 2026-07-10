@@ -495,4 +495,12 @@
         .projects-grid { grid-template-columns: 1fr; }
         .grid-2 { grid-template-columns: 1fr; }
     }
+    @media (max-width: 576px) {
+        .main-content { padding: 1.5rem 0; }
+        .page-header h1 { font-size: 1.75rem; }
+        .project-card { padding: 1rem; }
+        .modal-card { max-width: 95%; margin: 10px; }
+        .modal-body { padding: 1rem; gap: 1rem; }
+        .radio-group-horizontal { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    }
 </style>

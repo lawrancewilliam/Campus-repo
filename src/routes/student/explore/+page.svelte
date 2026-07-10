@@ -399,5 +399,9 @@
     @media (max-width: 768px) {
         .filter-selectors { flex-direction: column; gap: 1rem; }
         .projects-grid { grid-template-columns: 1fr; }
+        .explore-hero h1 { font-size: 1.85rem; }
+        .explore-hero p { font-size: 0.95rem; }
+        .explore-container { padding: 2rem 1rem; }
+        .filters-panel { padding: 1rem; margin-bottom: 2rem; }
     }
 </style>

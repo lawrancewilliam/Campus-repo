@@ -100,13 +100,8 @@
     <header class="navbar">
         <div class="container nav-container">
             <a href="/" class="logo">
-                <i class="fa-solid fa-graduation-cap"></i> CampusRepo
+                <i class="fa-solid fa-graduation-cap"></i> <span>CampusRepo</span>
             </a>
-            
-            <!-- Mobile Menu Button -->
-            <button class="mobile-menu-btn" onclick={toggleMobileMenu} aria-label="Toggle menu">
-                <i class="fa-solid fa-bars"></i>
-            </button>
 
             <!-- Nav Links (Responsive) -->
             <nav class="nav-links" class:active={mobileMenuOpen}>
@@ -114,9 +109,11 @@
                 <a href="/Login">Browse Projects</a>
                 <a href="#about">About</a>
                 <a href="#contact">Contact</a>
+                <a href="/Login" class="mobile-nav-only">Login</a>
+                <a href="/Reg" class="mobile-nav-only">Register</a>
             </nav>
             
-            <div class="auth-buttons" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="header-right" style="display: flex; align-items: center; gap: 1rem; margin-left: auto;">
                 <button onclick={() => themeState.toggle()} class="theme-toggle-btn" title="Toggle Theme">
                     {#if themeState.theme === 'dark'}
                         ☀️
@@ -124,8 +121,14 @@
                         🌙
                     {/if}
                 </button>
-                <button class="btn btn-outline" onclick={navigateToLogin}>Login</button>
-                <button class="btn btn-primary" onclick={navigateToRegister}>Register</button>
+                <div class="auth-buttons" style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="btn btn-outline" onclick={navigateToLogin}>Login</button>
+                    <button class="btn btn-primary" onclick={navigateToRegister}>Register</button>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" onclick={toggleMobileMenu} aria-label="Toggle menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -719,17 +722,20 @@
     /* 9. RESPONSIVE BREAKPOINTS                        */
     /*==================================================*/
 
+    .mobile-nav-only { display: none; }
+
     /* --- Tablet (768px+) --- */
     @media (min-width: 768px) {
         .nav-links { display: flex; }
         .mobile-menu-btn { display: none; } /* Hide hamburger on desktop */
+        .mobile-nav-only { display: none; }
 
         .hero-content {
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
             text-align: left;
         }
         .hero-text p { margin-inline: 0; }
-        .hero-buttons { justify-content: center; }
+        .hero-buttons { justify-content: flex-start; }
 
         .stats-grid { grid-template-columns: repeat(4, 1fr); }
         .features-grid { grid-template-columns: repeat(2, 1fr); }
@@ -744,7 +750,9 @@
 
     /* --- Mobile Specifics --- */
     @media (max-width: 767px) {
-        .auth-buttons { display: none; } /* Hide on mobile for simplicity, can be moved into menu */
+        .auth-buttons { display: none; } 
+        .mobile-nav-only { display: block; }
+        .logo span { display: none; }
 
         .nav-links.active {
             display: flex;
@@ -758,11 +766,13 @@
             box-shadow: var(--shadow-lg);
             border-bottom: 1px solid var(--border-nav);
             animation: fade-in 0.3s;
+            z-index: 1000;
         }
 
         .hero-content { text-align: center; }
         .hero-text p { margin-inline: auto; }
-        .hero-buttons { justify-content: center; }
+        .hero-buttons { justify-content: center; flex-direction: column; gap: var(--space-12); }
+        .hero-buttons .btn { width: 100%; justify-content: center; box-sizing: border-box; }
     }
 
     @keyframes slide-up {

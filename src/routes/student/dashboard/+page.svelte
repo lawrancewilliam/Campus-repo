@@ -659,4 +659,17 @@
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
         .recommended-grid { grid-template-columns: 1fr; }
     }
+
+    @media (max-width: 576px) {
+        .stats-grid { grid-template-columns: 1fr; }
+        .dash-welcome { padding: 2rem 1.25rem; text-align: center; }
+        .dash-welcome h1 { font-size: 1.65rem; }
+        .dash-welcome p { font-size: 0.95rem; margin-bottom: 1.5rem; }
+        .hero-actions { flex-direction: column; gap: 0.75rem; }
+        .hero-actions .btn { width: 100%; justify-content: center; box-sizing: border-box; }
+        .panel { padding: 1rem; }
+        .modal-card { max-width: 95%; margin: 10px; }
+        .modal-body { padding: 1rem; gap: 1rem; }
+        .radio-group-horizontal { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    }
 </style>

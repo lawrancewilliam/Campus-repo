@@ -161,4 +161,9 @@
         .profile-card { display: flex; flex-direction: column; align-items: center; }
         .profile-avatar-large { width: 80px; height: 80px; font-size: 2rem; }
     }
+    @media (max-width: 576px) {
+        .main-content { padding: 1.5rem 0; }
+        .settings-card { padding: 1.25rem; }
+        .btn-primary { width: 100%; justify-content: center; }
+    }
 </style>

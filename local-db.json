@@ -137,6 +137,21 @@
       "bookmarkedProjectIds": [],
       "createdAt": "2026-07-07T14:56:19.341Z",
       "passwordHash": "$2b$10$vVx4urx.6A6xirakgt10ZODyR25yHoLS.AgMlMiesexNicDEHSn8K"
+    },
+    "2503617862221039": {
+      "userId": "2503617862221039",
+      "username": "123 456",
+      "name": "123 456",
+      "email": "1234567@sonatech.ac.in",
+      "mobile": "9360017082",
+      "registerNumber": "2503617862221039",
+      "department": "CIVIL",
+      "academicYear": "3 Year",
+      "bio": "No bio yet.",
+      "joinedDate": "Jul 2026",
+      "bookmarkedProjectIds": [],
+      "createdAt": "2026-07-08T05:07:02.053Z",
+      "passwordHash": "$2b$10$hrsb5aZ0pSPpqBO8izKr2.byJYXKmBtOIP.1yIxw/7tzTWZ.UdLAW"
     }
   },
   "projects": {
@@ -304,6 +319,13 @@
       "time": "Just now",
       "timestamp": 1783436179419,
       "id": "1scbci54sst"
+    },
+    "gvppuezc0p4": {
+      "type": "join",
+      "text": "<strong>123 456</strong> joined CampusRepo",
+      "time": "Just now",
+      "timestamp": 1783487222090,
+      "id": "gvppuezc0p4"
     }
   }
 }

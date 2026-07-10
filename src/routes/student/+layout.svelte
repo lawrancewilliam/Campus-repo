@@ -24,15 +24,15 @@
     <header class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
-                <i class="fa-solid fa-graduation-cap"></i> CampusRepo
+                <i class="fa-solid fa-graduation-cap"></i> <span>CampusRepo</span>
             </a>
             
             <nav class="nav-menu" aria-label="Main navigation">
-                <a href="/student/dashboard" class="nav-link" class:active={$page.url.pathname === '/student/dashboard'}><i class="fa-solid fa-house"></i> Home</a>
-                <a href="/student/explore" class="nav-link" class:active={$page.url.pathname === '/student/explore'}><i class="fa-solid fa-compass"></i> Explore</a>
-                <a href="/student/upload" class="nav-link" class:active={$page.url.pathname === '/student/upload'}><i class="fa-solid fa-cloud-arrow-up"></i> Upload</a>
-                <a href="/student/my-projects" class="nav-link" class:active={$page.url.pathname === '/student/my-projects'}><i class="fa-solid fa-folder-open"></i> My Projects</a>
-                <a href="/student/profile" class="nav-link" class:active={$page.url.pathname === '/student/profile'}><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="/student/dashboard" class="nav-link" class:active={$page.url.pathname === '/student/dashboard'}><i class="fa-solid fa-house"></i> <span>Home</span></a>
+                <a href="/student/explore" class="nav-link" class:active={$page.url.pathname === '/student/explore'}><i class="fa-solid fa-compass"></i> <span>Explore</span></a>
+                <a href="/student/upload" class="nav-link" class:active={$page.url.pathname === '/student/upload'}><i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload</span></a>
+                <a href="/student/my-projects" class="nav-link" class:active={$page.url.pathname === '/student/my-projects'}><i class="fa-solid fa-folder-open"></i> <span>My Projects</span></a>
+                <a href="/student/profile" class="nav-link" class:active={$page.url.pathname === '/student/profile'}><i class="fa-solid fa-user"></i> <span>Profile</span></a>
             </nav>
             
             <div class="navbar-actions">
@@ -56,7 +56,7 @@
 
                 <!-- Logout Button -->
                 <button onclick={() => { logout(); window.location.href = '/Login'; }} class="logout-btn-nav" title="Logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
                 </button>
             </div>
         </div>
@@ -208,5 +208,14 @@
     @media (max-width: 768px) {
         .profile-details { display: none; }
         .nav-link span { display: none; }
+        .logout-btn-nav span { display: none; }
+        .logout-btn-nav { padding: 0.5rem; width: 36px; height: 36px; justify-content: center; }
+    }
+    @media (max-width: 480px) {
+        .logo span { display: none; }
+        .nav-container { padding: 0 0.5rem; }
+        .navbar-actions { gap: 0.4rem; }
+        .nav-menu { gap: 0.15rem; }
+        .nav-link { padding: 0.5rem 0.5rem; }
     }
 </style>

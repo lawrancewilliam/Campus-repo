@@ -281,4 +281,11 @@
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
         .analytics-grid { grid-template-columns: 1fr; }
     }
+    @media (max-width: 576px) {
+        .main-container { padding: 1.5rem 1rem; }
+        .admin-welcome { padding: 2rem 1.25rem; text-align: center; }
+        .admin-welcome h1 { font-size: 1.65rem; }
+        .stats-grid { grid-template-columns: 1fr; }
+        .panel { padding: 1rem; }
+    }
 </style>

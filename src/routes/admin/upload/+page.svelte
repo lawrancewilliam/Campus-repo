@@ -593,4 +593,11 @@
         .upload-layout { grid-template-columns: 1fr; }
         .sidebar { position: static; }
     }
+    @media (max-width: 576px) {
+        .main-content { padding: 1.5rem 0 3rem; }
+        .form-card { padding: 1.25rem; }
+        .grid-row-2 { grid-template-columns: 1fr; }
+        .page-header h1 { font-size: 1.65rem; }
+        .file-grid { grid-template-columns: 1fr; }
+    }
 </style>

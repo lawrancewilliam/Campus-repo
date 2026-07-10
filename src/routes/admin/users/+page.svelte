@@ -918,4 +918,14 @@
         .stats-section-grid { grid-template-columns: repeat(2, 1fr); }
         .moderation-toggles-row { grid-template-columns: 1fr; }
     }
+    @media (max-width: 576px) {
+        .directory-container { padding: 1.5rem 1rem; }
+        .stats-section-grid { grid-template-columns: 1fr; }
+        .grid-2 { grid-template-columns: 1fr; }
+        .detail-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .header-actions { width: 100%; display: flex; gap: 0.5rem; }
+        .header-actions button, .header-actions a { flex: 1; text-align: center; justify-content: center; }
+        .modal-card { max-width: 95%; margin: 10px; }
+        .project-actions-row { flex-direction: column; }
+    }
 </style>

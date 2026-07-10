@@ -570,4 +570,12 @@
         .filters { justify-content: space-between; }
         .flags-grid { grid-template-columns: 1fr; width: 100px; }
     }
+    @media (max-width: 576px) {
+        .uploads-container { padding: 1.5rem 1rem; }
+        .page-header h1 { font-size: 1.75rem; }
+        .filters { flex-direction: column; gap: 0.75rem; width: 100%; }
+        .select-group { width: 100%; justify-content: space-between; }
+        .filter-select { width: 60%; }
+        .modal-card { max-width: 95%; margin: 10px; }
+    }
 </style>

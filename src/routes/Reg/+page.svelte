@@ -354,7 +354,23 @@
         color: var(--text-secondary);
     }
     .form-footer a { color: var(--primary); font-weight: 600; }
-    
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+        .register-wrapper { padding: 1rem; }
+        .register-card { flex-direction: column; max-width: 550px; }
+        .register-visual { padding: 2.5rem 2rem; min-height: 180px; border-right: none; border-bottom: 1px solid var(--border-color); }
+        .register-form-container { padding: 2rem; max-height: none; overflow-y: visible; }
+        .form-grid { grid-template-columns: 1fr; gap: 1rem; }
+        .form-group.full-width { grid-column: span 1; }
+        .nav-links { display: none; }
+    }
+    @media (max-width: 480px) {
+        .register-visual { display: none; }
+        .register-wrapper { padding: 0.5rem; }
+        .register-form-container { padding: 1.5rem 1rem; }
+        .logo span { display: none; }
+    }
 </style>
 
 <!-- TOAST CONTAINER -->
@@ -371,7 +387,7 @@
 <header class="navbar">
     <div class="container nav-container">
         <a href="/" class="logo">
-            <i class="fa-solid fa-graduation-cap"></i> CampusRepo
+            <i class="fa-solid fa-graduation-cap"></i> <span>CampusRepo</span>
         </a>
         <nav class="nav-links">
             <a href="/">Home</a>
