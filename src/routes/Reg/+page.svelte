@@ -111,6 +111,7 @@
             });
 
             if (!result.success) {
+                alert(result.message);
                 showToast(result.message, "error");
                 isLoading = false;
                 return;

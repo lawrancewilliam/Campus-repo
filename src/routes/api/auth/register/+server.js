@@ -20,14 +20,14 @@ export async function POST({ request }) {
 		// 2. Check if Register Number already exists
 		const regSnap = await studentsRef.doc(registerNumber).get();
 		if (regSnap.exists) {
-			return json({ success: false, message: 'Register Number already exists.' }, { status: 400 });
+			return json({ success: false, message: 'Already this ID has been taken.' }, { status: 400 });
 		}
 
 		// 3. Check if Email already exists
 		const normalizedEmail = email.trim().toLowerCase();
 		const emailSnap = await studentsRef.where('email', '==', normalizedEmail).limit(1).get();
 		if (!emailSnap.empty) {
-			return json({ success: false, message: 'Email already exists.' }, { status: 400 });
+			return json({ success: false, message: 'Already this Email has been taken.' }, { status: 400 });
 		}
 
 		// 4. Securely hash password

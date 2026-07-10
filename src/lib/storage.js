@@ -172,7 +172,17 @@ export async function uploadProject(projectMetadata, filesObj, author) {
             body: formData
         });
 
-        const result = await response.json();
+        let result;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+        } else {
+            const text = await response.text();
+            return {
+                success: false,
+                message: text.substring(0, 100) || `Server error (Status ${response.status})`
+            };
+        }
 
         if (result.success) {
             await logActivity('upload', `<strong>${author.name || author.username || 'Student'}</strong> uploaded <strong>${projectMetadata.title || projectMetadata.projectName}</strong>`, "Just now");

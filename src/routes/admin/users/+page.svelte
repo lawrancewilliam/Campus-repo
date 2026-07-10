@@ -913,7 +913,7 @@
     }
 
     @media (max-width: 850px) {
-        .directory-layout { grid-template-columns: 1fr; height: auto; }
+        .directory-layout { grid-template-columns: 1fr; height: auto; min-height: auto; }
         .students-list-panel { height: 350px; }
         .stats-section-grid { grid-template-columns: repeat(2, 1fr); }
         .moderation-toggles-row { grid-template-columns: 1fr; }

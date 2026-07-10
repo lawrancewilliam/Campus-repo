@@ -1,13 +1,8 @@
 <script>
-    import { onMount } from 'svelte';
     import { themeState } from '$lib/theme.svelte.js';
 
     // --- STATE VARIABLES ---
     let mobileMenuOpen = $state(false);
-
-    // --- REFS ---
-    let statsSection;
-    let counters = [];
 
     // --- NAVIGATION FUNCTIONS ---
     // Note: In a real Svelte SPA, you would use a router like 'svelte-routing' or 'svelte-navigator'.
@@ -28,53 +23,6 @@
     const toggleMobileMenu = () => {
         mobileMenuOpen = !mobileMenuOpen;
     };
-
-    // --- STATS ANIMATION LOGIC ---
-    const animateValue = (obj, start, end, duration) => {
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            obj.innerHTML = Math.floor(progress * (end - start) + start);
-            if (progress < 1) {
-                window.requestAnimationFrame(step);
-            }
-        };
-        window.requestAnimationFrame(step);
-    };
-
-    const startStatistics = () => {
-        if (!counters.length) return;
-        
-        counters.forEach(counter => {
-            const target = +counter.getAttribute('data-target');
-            animateValue(counter, 0, target, 2000);
-        });
-    };
-
-    // --- LIFECYCLE ---
-    onMount(() => {
-        // Initialize counters array
-        counters = document.querySelectorAll('.stat-card h3');
-
-        // Intersection Observer to trigger animation when scrolled into view
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    startStatistics();
-                    observer.disconnect(); // Run once
-                }
-            });
-        }, { threshold: 0.5 });
-
-        if (statsSection) {
-            observer.observe(statsSection);
-        }
-
-        return () => {
-            if (statsSection) observer.unobserve(statsSection);
-        };
-    });
 </script>
 
 <svelte:head>
@@ -105,12 +53,12 @@
 
             <!-- Nav Links (Responsive) -->
             <nav class="nav-links" class:active={mobileMenuOpen}>
-                <a href="#home" class="active">Home</a>
-                <a href="/Login">Browse Projects</a>
-                <a href="#about">About</a>
-                <a href="#contact">Contact</a>
-                <a href="/Login" class="mobile-nav-only">Login</a>
-                <a href="/Reg" class="mobile-nav-only">Register</a>
+                <a href="#home" class="active" onclick={() => mobileMenuOpen = false}>Home</a>
+                <a href="/Login" onclick={() => mobileMenuOpen = false}>Browse Projects</a>
+                <a href="#about" onclick={() => mobileMenuOpen = false}>About</a>
+                <a href="#contact" onclick={() => mobileMenuOpen = false}>Contact</a>
+                <a href="/Login" class="mobile-nav-only" onclick={() => mobileMenuOpen = false}>Login</a>
+                <a href="/Reg" class="mobile-nav-only" onclick={() => mobileMenuOpen = false}>Register</a>
             </nav>
             
             <div class="header-right" style="display: flex; align-items: center; gap: 1rem; margin-left: auto;">
@@ -127,7 +75,11 @@
                 </div>
                 <!-- Mobile Menu Button -->
                 <button class="mobile-menu-btn" onclick={toggleMobileMenu} aria-label="Toggle menu">
-                    <i class="fa-solid fa-bars"></i>
+                    {#if mobileMenuOpen}
+                        <i class="fa-solid fa-xmark"></i>
+                    {:else}
+                        <i class="fa-solid fa-bars"></i>
+                    {/if}
                 </button>
             </div>
         </div>
@@ -153,33 +105,6 @@
             </div>
         </section>
 
-        <!-- 3. Statistics Section -->
-        <section class="stats-section" bind:this={statsSection}>
-            <div class="container">
-                <div class="stats-grid" id="statsContainer">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-code-branch"></i></div>
-                        <h3 data-target="1250">0</h3>
-                        <p>Total Projects</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                        <h3 data-target="3400">0</h3>
-                        <p>Registered Students</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-building-columns"></i></div>
-                        <h3 data-target="12">0</h3>
-                        <p>Departments</p>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-download"></i></div>
-                        <h3 data-target="8900">0</h3>
-                        <p>Total Downloads</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Intro/Features -->
         <section class="section-padding features" id="about">
@@ -654,21 +579,6 @@
         border: 1px solid var(--border-nav);
     }
 
-    .cta-section::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 24px;
-        padding: 1px;
-        background: linear-gradient(70deg, var(--primary), var(--accent));
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        animation: spin 5s linear infinite;
-        z-index: -1;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     .cta-section p { margin-bottom: var(--space-32); font-size: var(--font-body-lg); color: var(--text-hero-muted); }
     .btn-white { background-color: white; color: var(--bg-color); height: 48px; }
     .btn-white:hover { background-color: var(--primary-hover); }
@@ -773,6 +683,11 @@
         .hero-text p { margin-inline: auto; }
         .hero-buttons { justify-content: center; flex-direction: column; gap: var(--space-12); }
         .hero-buttons .btn { width: 100%; justify-content: center; box-sizing: border-box; }
+        .hero-image { transform: none !important; }
+    }
+
+    @media (max-width: 576px) {
+        .stats-grid { grid-template-columns: 1fr; gap: var(--space-24); }
     }
 
     @keyframes slide-up {

@@ -33,5 +33,7 @@ export async function handle({ event, resolve }) {
         );
     }
 
-    return await resolve(event);
+    return await resolve(event, {
+        bodySizeLimit: 100 * 1024 * 1024 // 100MB limit for uploading project files
+    });
 }

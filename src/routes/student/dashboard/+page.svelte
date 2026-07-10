@@ -380,7 +380,7 @@
     
     .recommended-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
     }
     .rec-card {
@@ -396,9 +396,9 @@
         transform: translateY(-2px);
         border-color: var(--primary);
     }
-    .rec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-    .rec-category { font-size: 0.7rem; background: rgba(59,130,246,0.1); color: var(--primary); font-weight: 600; padding: 2px 6px; border-radius: 4px; }
-    .rec-flags { display: flex; gap: 0.25rem; }
+    .rec-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .rec-category { font-size: 0.7rem; background: rgba(59,130,246,0.1); color: var(--primary); font-weight: 600; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+    .rec-flags { display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
     .flag { font-size: 0.62rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; display: flex; align-items: center; gap: 3px; }
     .f-feat { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
     .f-rec { background: rgba(16, 185, 129, 0.15); color: var(--success); }

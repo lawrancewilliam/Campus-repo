@@ -385,7 +385,7 @@
         border-radius: 1rem;
         overflow: hidden;
     }
-    .table-responsive { overflow-x: auto; }
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     
     .uploads-table {
         width: 100%;
